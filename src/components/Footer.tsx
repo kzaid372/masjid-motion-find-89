@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Clock, Heart, Mail, Phone, Info, GitHub } from 'lucide-react';
+import { MapPin, Clock, Heart, Mail, Phone, Info, Github } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -91,7 +90,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
           <p>&copy; {new Date().getFullYear()} MasjidFinder. All rights reserved.</p>
           <p className="mt-2 flex items-center justify-center">
-            <GitHub className="h-4 w-4 mr-1" />
+            <Github className="h-4 w-4 mr-1" />
             <span>Open source project for the Muslim community</span>
           </p>
         </div>
