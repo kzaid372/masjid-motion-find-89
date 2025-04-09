@@ -11,29 +11,32 @@ import SavedMasjids from "./pages/SavedMasjids";
 import MasjidDetails from "./pages/MasjidDetails";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import DonationPage from "./pages/DonationPage";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/find" element={<FindMasjid />} />
-            <Route path="/prayer-times" element={<PrayerTimes />} />
-            <Route path="/saved" element={<SavedMasjids />} />
-            <Route path="/masjid/:id" element={<MasjidDetails />} />
-            <Route path="/donate" element={<DonationPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/find" element={<FindMasjid />} />
+              <Route path="/prayer-times" element={<PrayerTimes />} />
+              <Route path="/saved" element={<SavedMasjids />} />
+              <Route path="/masjid/:id" element={<MasjidDetails />} />
+              <Route path="/donate" element={<DonationPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

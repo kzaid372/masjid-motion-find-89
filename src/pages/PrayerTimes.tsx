@@ -4,8 +4,10 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Bell, Clock, MapPin, ChevronDown, ChevronRight, Settings } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Calendar, Bell, Clock, MapPin, ChevronDown, ChevronRight, Settings, Moon, Sun } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTheme } from '@/context/ThemeContext';
 
 // Mock prayer time data
 const prayerTimesData = {
@@ -24,6 +26,7 @@ const prayerTimesData = {
 
 const PrayerTimes = () => {
   const [location, setLocation] = useState(prayerTimesData.location);
+  const { theme, toggleTheme } = useTheme();
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -58,6 +61,14 @@ const PrayerTimes = () => {
               </div>
               
               <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2 border-masjid-green/20 text-masjid-green hover:bg-masjid-green/10"
+                  onClick={toggleTheme}
+                >
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  <span>{theme === 'dark' ? 'Light' : 'Dark'} Mode</span>
+                </Button>
                 <Button variant="outline" className="flex items-center gap-2 border-masjid-green/20 text-masjid-green hover:bg-masjid-green/10">
                   <Calendar className="h-4 w-4" />
                   <span>Calendar</span>
@@ -86,34 +97,51 @@ const PrayerTimes = () => {
                 </div>
               </div>
               
-              <CardContent className="p-0">
-                <div className="grid grid-cols-1 divide-y">
-                  {prayerTimesData.timings.map((prayer, index) => (
-                    <div 
-                      key={index} 
-                      className={`flex justify-between items-center p-4 ${
-                        prayer.status === 'next' ? 'bg-green-50' : ''
-                      }`}
-                    >
+              <CardContent className="p-4">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="prayer-times">
+                    <AccordionTrigger className="py-2 px-4 font-medium text-masjid-dark">
                       <div className="flex items-center">
-                        {prayer.status === 'next' && (
-                          <ChevronRight className="h-5 w-5 text-masjid-green mr-2 animate-pulse-gentle" />
-                        )}
-                        <span className={`text-lg ${prayer.status === 'next' ? 'font-bold text-masjid-green' : 'text-masjid-dark'}`}>
-                          {prayer.name}
-                        </span>
+                        <Clock className="h-5 w-5 mr-2 text-masjid-green" />
+                        <span>Prayer Times</span>
                       </div>
-                      <div className="flex items-center">
-                        <span className={`${prayer.status === 'next' ? 'font-bold text-masjid-green' : 'text-gray-600'}`}>
-                          {prayer.time}
-                        </span>
-                        <Button variant="ghost" size="icon" className="ml-2 text-gray-400 hover:text-masjid-green">
-                          <Bell className="h-4 w-4" />
-                        </Button>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="grid grid-cols-1 gap-2 p-2">
+                        {prayerTimesData.timings.map((prayer, index) => (
+                          <div 
+                            key={index} 
+                            className={`flex justify-between items-center p-3 rounded-md ${
+                              prayer.status === 'next' ? 'bg-green-50 border border-masjid-green/20' : 'border border-gray-100'
+                            }`}
+                          >
+                            <div className="flex items-center">
+                              {prayer.status === 'next' && (
+                                <ChevronRight className="h-5 w-5 text-masjid-green mr-2 animate-pulse-gentle" />
+                              )}
+                              <span className={`${prayer.status === 'next' ? 'font-bold text-masjid-green' : 'text-masjid-dark'}`}>
+                                {prayer.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <span className={`${prayer.status === 'next' ? 'font-bold text-masjid-green' : 'text-gray-600'}`}>
+                                {prayer.time}
+                              </span>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="ml-2 text-gray-400 hover:text-masjid-green"
+                                onClick={() => alert(`Notification set for ${prayer.name} at ${prayer.time}`)}
+                              >
+                                <Bell className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </CardContent>
             </Card>
             
@@ -127,7 +155,12 @@ const PrayerTimes = () => {
                         <CardTitle className="text-base font-semibold">{masjid}</CardTitle>
                         <CardDescription className="text-sm">{0.8 + index * 0.7} km away</CardDescription>
                       </div>
-                      <Button variant="outline" size="sm" className="text-masjid-green text-xs border-masjid-green/20 hover:bg-masjid-green/10">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-masjid-green text-xs border-masjid-green/20 hover:bg-masjid-green/10"
+                        onClick={() => alert(`Showing prayer times for ${masjid}`)}
+                      >
                         View Times
                       </Button>
                     </CardHeader>
@@ -140,7 +173,11 @@ const PrayerTimes = () => {
               <p className="text-gray-500 text-sm">
                 Prayer times are calculated using the MWL method.
               </p>
-              <Button variant="link" className="text-masjid-green">
+              <Button 
+                variant="link" 
+                className="text-masjid-green"
+                onClick={() => alert("Opening calculation method settings")}
+              >
                 <Settings className="h-4 w-4 mr-1" />
                 Adjust Calculation Method
               </Button>
