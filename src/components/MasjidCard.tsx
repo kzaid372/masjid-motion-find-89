@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { MapPin, Star, Navigation, Clock, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Star, Navigation, Clock, ExternalLink, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { toast } from '@/components/ui/use-toast';
 
 interface MasjidCardProps {
   id: string;
@@ -42,7 +42,7 @@ const MasjidCard = ({
   nextPrayer,
   prayerTimes,
 }: MasjidCardProps) => {
-  const [showPrayerTimes, setShowPrayerTimes] = useState(false);
+  const [favorite, setFavorite] = useState(isFavorite);
   
   const renderStars = (rating: number) => {
     return Array(5)
@@ -61,6 +61,14 @@ const MasjidCard = ({
       ));
   };
 
+  const toggleFavorite = () => {
+    setFavorite(!favorite);
+    toast({
+      title: favorite ? "Removed from favorites" : "Added to favorites",
+      description: favorite ? `${name} has been removed from your favorites` : `${name} has been added to your favorites`,
+    });
+  };
+
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg animate-scale-in">
       <div className="relative h-48 overflow-hidden">
@@ -69,11 +77,19 @@ const MasjidCard = ({
           alt={name} 
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
         />
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 flex gap-2">
           <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm text-masjid-dark">
             <MapPin className="h-3 w-3 mr-1 text-masjid-green" />
             {distance}
           </Badge>
+          <Button 
+            variant="secondary" 
+            size="icon" 
+            className="h-7 w-7 bg-white/90 backdrop-blur-sm hover:bg-white"
+            onClick={toggleFavorite}
+          >
+            <Heart className={`h-4 w-4 ${favorite ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} />
+          </Button>
         </div>
         {nextPrayer && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
@@ -101,56 +117,39 @@ const MasjidCard = ({
       
       <CardContent className="pb-2">
         {prayerTimes && (
-          <Collapsible 
-            open={showPrayerTimes} 
-            onOpenChange={setShowPrayerTimes}
-            className="mt-2 border rounded-lg p-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-masjid-green flex items-center">
-                <Clock className="h-4 w-4 mr-1" />
-                Prayer Times
-              </span>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
-                  {showPrayerTimes ? (
-                    <ChevronUp className="h-4 w-4 text-masjid-green" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-masjid-green" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
+          <div className="mt-2 border rounded-lg p-3 bg-masjid-green/5">
+            <div className="flex items-center mb-2">
+              <Clock className="h-4 w-4 mr-1 text-masjid-green" />
+              <span className="text-sm font-medium text-masjid-green">Prayer Times</span>
             </div>
             
-            <CollapsibleContent className="mt-2 space-y-1">
-              <div className="grid grid-cols-2 gap-1 text-xs">
-                <div className="flex justify-between border-b pb-1">
-                  <span className="font-medium">Fajr:</span>
-                  <span>{prayerTimes.fajr}</span>
-                </div>
-                <div className="flex justify-between border-b pb-1">
-                  <span className="font-medium">Dhuhr:</span>
-                  <span>{prayerTimes.dhuhr}</span>
-                </div>
-                <div className="flex justify-between border-b pb-1">
-                  <span className="font-medium">Asr:</span>
-                  <span>{prayerTimes.asr}</span>
-                </div>
-                <div className="flex justify-between border-b pb-1">
-                  <span className="font-medium">Maghrib:</span>
-                  <span>{prayerTimes.maghrib}</span>
-                </div>
-                <div className="flex justify-between border-b pb-1">
-                  <span className="font-medium">Isha:</span>
-                  <span>{prayerTimes.isha}</span>
-                </div>
-                <div className="flex justify-between border-b pb-1">
-                  <span className="font-medium">Jummah:</span>
-                  <span>{prayerTimes.jummah}</span>
-                </div>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="flex flex-col items-center p-1.5 bg-white rounded border">
+                <span className="font-medium text-masjid-dark">Fajr</span>
+                <span className="text-masjid-green">{prayerTimes.fajr}</span>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
+              <div className="flex flex-col items-center p-1.5 bg-white rounded border">
+                <span className="font-medium text-masjid-dark">Dhuhr</span>
+                <span className="text-masjid-green">{prayerTimes.dhuhr}</span>
+              </div>
+              <div className="flex flex-col items-center p-1.5 bg-white rounded border">
+                <span className="font-medium text-masjid-dark">Asr</span>
+                <span className="text-masjid-green">{prayerTimes.asr}</span>
+              </div>
+              <div className="flex flex-col items-center p-1.5 bg-white rounded border">
+                <span className="font-medium text-masjid-dark">Maghrib</span>
+                <span className="text-masjid-green">{prayerTimes.maghrib}</span>
+              </div>
+              <div className="flex flex-col items-center p-1.5 bg-white rounded border">
+                <span className="font-medium text-masjid-dark">Isha</span>
+                <span className="text-masjid-green">{prayerTimes.isha}</span>
+              </div>
+              <div className="flex flex-col items-center p-1.5 bg-white rounded border">
+                <span className="font-medium text-masjid-dark">Jummah</span>
+                <span className="text-masjid-green">{prayerTimes.jummah}</span>
+              </div>
+            </div>
+          </div>
         )}
         
         {facilities.length > 0 && (
