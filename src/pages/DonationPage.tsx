@@ -6,7 +6,7 @@ import DonationSection from '@/components/DonationSection';
 
 const DonationPage = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
       <Navbar />
       
       <main className="flex-grow pt-16">
