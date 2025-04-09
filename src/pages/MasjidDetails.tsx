@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -14,7 +15,6 @@ import {
   Star, 
   Heart, 
   Share2, 
-  Bookmark, 
   Phone, 
   Mail, 
   Users, 
@@ -207,13 +207,6 @@ const MasjidDetails = () => {
     });
   };
   
-  const saveMasjid = () => {
-    toast({
-      title: "Masjid Saved",
-      description: `${masjid.name} has been saved to your list.`,
-    });
-  };
-  
   const getDirections = () => {
     toast({
       title: "Getting Directions",
@@ -291,10 +284,6 @@ const MasjidDetails = () => {
             <Button variant="outline" onClick={shareMasjid} className="whitespace-nowrap">
               <Share2 className="h-4 w-4 mr-2" />
               Share
-            </Button>
-            <Button variant="outline" onClick={saveMasjid} className="whitespace-nowrap">
-              <Bookmark className="h-4 w-4 mr-2" />
-              Save
             </Button>
           </div>
         </div>
@@ -752,49 +741,54 @@ const MasjidDetails = () => {
                     </div>
                     
                     <div>
-                      <h4 className="text-lg font-medium mb-4 text-masjid-dark">Payment Methods</h4>
+                      <h4 className="text-lg font-medium mb-4 text-masjid-dark">Payment Details</h4>
                       <div className="space-y-4">
-                        <div className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
-                          <div className="flex items-center">
-                            <CreditCard className="h-5 w-5 mr-3 text-masjid-green" />
-                            <div>
-                              <p className="font-medium">Credit/Debit Card</p>
-                              <p className="text-sm text-gray-600">Secure payment via Stripe</p>
+                        <div className="border rounded-lg p-4">
+                          <h5 className="font-medium mb-2">Card Information</h5>
+                          <div className="space-y-3">
+                            <input 
+                              type="text" 
+                              className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
+                              placeholder="Card number"
+                            />
+                            <div className="grid grid-cols-2 gap-3">
+                              <input 
+                                type="text" 
+                                className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
+                                placeholder="MM/YY"
+                              />
+                              <input 
+                                type="text" 
+                                className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
+                                placeholder="CVC"
+                              />
                             </div>
                           </div>
                         </div>
                         
-                        <div className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
-                          <div className="flex items-center">
-                            <Banknote className="h-5 w-5 mr-3 text-masjid-green" />
-                            <div>
-                              <p className="font-medium">Bank Transfer</p>
-                              <p className="text-sm text-gray-600">Direct deposit to our account</p>
-                            </div>
+                        <div className="border rounded-lg p-4">
+                          <h5 className="font-medium mb-2">Billing Information</h5>
+                          <div className="space-y-3">
+                            <input 
+                              type="text" 
+                              className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
+                              placeholder="Name on card"
+                            />
+                            <input 
+                              type="text" 
+                              className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
+                              placeholder="Email address"
+                            />
+                            <input 
+                              type="text" 
+                              className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
+                              placeholder="Billing address"
+                            />
                           </div>
                         </div>
                         
-                        <div className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
-                          <div className="flex items-center">
-                            <QrCode className="h-5 w-5 mr-3 text-masjid-green" />
-                            <div>
-                              <p className="font-medium">QR Code Payment</p>
-                              <p className="text-sm text-gray-600">Scan with your banking app</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-6 bg-green-50 p-4 rounded-lg">
-                        <h5 className="font-medium flex items-center text-masjid-green">
-                          <Info className="h-4 w-4 mr-2" />
-                          Monthly Giving Program
-                        </h5>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Support our masjid consistently by joining our monthly donation program.
-                        </p>
-                        <Button variant="outline" className="mt-3 border-masjid-green text-masjid-green hover:bg-masjid-green/10">
-                          Learn More
+                        <Button className="w-full bg-masjid-green hover:bg-masjid-green/90 py-6">
+                          Complete Donation
                         </Button>
                       </div>
                     </div>
@@ -806,25 +800,17 @@ const MasjidDetails = () => {
                       <div className="bg-green-50 p-4 rounded-lg text-center">
                         <Book className="h-8 w-8 mx-auto text-masjid-green mb-2" />
                         <h5 className="font-medium text-masjid-green">Educational Programs</h5>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Supporting Quran classes and Islamic education for all ages
-                        </p>
+                        <p className="text-sm text-gray-600 mt-1">Supporting Quran classes and Islamic education.</p>
                       </div>
-                      
-                      <div className="bg-green-50 p-4 rounded-lg text-center">
-                        <ParkingCircle className="h-8 w-8 mx-auto text-masjid-green mb-2" />
-                        <h5 className="font-medium text-masjid-green">Facility Maintenance</h5>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Keeping our masjid clean, beautiful, and well-maintained
-                        </p>
-                      </div>
-                      
                       <div className="bg-green-50 p-4 rounded-lg text-center">
                         <Users className="h-8 w-8 mx-auto text-masjid-green mb-2" />
                         <h5 className="font-medium text-masjid-green">Community Services</h5>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Support for community events, programs, and charitable services
-                        </p>
+                        <p className="text-sm text-gray-600 mt-1">Providing resources and aid to community members.</p>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg text-center">
+                        <ParkingCircle className="h-8 w-8 mx-auto text-masjid-green mb-2" />
+                        <h5 className="font-medium text-masjid-green">Facility Maintenance</h5>
+                        <p className="text-sm text-gray-600 mt-1">Keeping our masjid beautiful and functional.</p>
                       </div>
                     </div>
                   </div>
@@ -833,23 +819,29 @@ const MasjidDetails = () => {
             </TabsContent>
             
             <TabsContent value="photos" className="animate-fade-in">
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold">Photo Gallery</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {masjid.gallery.map((image, index) => (
-                    <div key={index} className="rounded-lg overflow-hidden aspect-video hover:opacity-90 transition-opacity cursor-pointer shadow-sm">
-                      <img src={image} alt={`${masjid.name} - ${index + 1}`} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="text-center mt-6">
-                  <p className="text-gray-600 mb-3">View our complete gallery to see more of our beautiful masjid and community events.</p>
-                  <Button variant="default" className="bg-masjid-green hover:bg-masjid-green/90">
-                    View Full Gallery
-                  </Button>
-                </div>
-              </div>
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="text-xl font-semibold mb-6 text-center">Photo Gallery</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {masjid.gallery.map((photo, index) => (
+                      <div 
+                        key={index} 
+                        className="relative aspect-square rounded-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-[1.02]"
+                      >
+                        <img src={photo} alt={`${masjid.name} - ${index + 1}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-6 text-center">
+                    <Button variant="outline" className="mt-2">
+                      <Book className="h-4 w-4 mr-2" />
+                      View All Photos
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
