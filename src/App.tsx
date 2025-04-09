@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import FindMasjid from "./pages/FindMasjid";
 import PrayerTimes from "./pages/PrayerTimes";
 import SavedMasjids from "./pages/SavedMasjids";
+import MasjidDetails from "./pages/MasjidDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/find" element={<FindMasjid />} />
           <Route path="/prayer-times" element={<PrayerTimes />} />
           <Route path="/saved" element={<SavedMasjids />} />
+          <Route path="/masjid/:id" element={<MasjidDetails />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

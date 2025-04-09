@@ -4,6 +4,7 @@ import { MapPin, Star, Navigation, Clock, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 interface MasjidCardProps {
   id: string;
@@ -104,9 +105,11 @@ const MasjidCard = ({
           <Navigation className="h-4 w-4 mr-2" />
           Directions
         </Button>
-        <Button variant="default" className="bg-masjid-green hover:bg-masjid-green/90">
-          <ExternalLink className="h-4 w-4 mr-2" />
-          Details
+        <Button variant="default" className="bg-masjid-green hover:bg-masjid-green/90" asChild>
+          <Link to={`/masjid/${id}`}>
+            <ExternalLink className="h-4 w-4 mr-2" />
+            Details
+          </Link>
         </Button>
       </CardFooter>
     </Card>
