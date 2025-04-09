@@ -24,7 +24,7 @@ import {
   Info,
   Book,
   UserCheck,
-  Language,
+  Languages,
   Utensils,
   ChevronRight,
   ParkingCircle,
@@ -36,7 +36,7 @@ import SimpleMap from '@/components/SimpleMap';
 import { toast } from '@/components/ui/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-// Mock data - in a real app, this would come from an API
+// Updated mock data with consistent structure for both masjids
 const masjidData = {
   '1': {
     id: '1',
@@ -117,12 +117,29 @@ const masjidData = {
     contact: {
       phone: '+1 (555) 987-6543',
       email: 'contact@alrahman.mosque',
-      website: 'www.alrahman.mosque'
+      website: 'www.alrahman.mosque',
+      socialMedia: {
+        facebook: 'facebook.com/alrahman',
+        instagram: 'instagram.com/alrahman'
+      }
     },
     events: [
       { id: '1', title: 'Islamic Studies Class', date: 'Wednesdays, 7:30 PM', description: 'Weekly lessons on Islamic teachings' },
       { id: '2', title: 'Community Dinner', date: 'Last Saturday of each month', description: 'Monthly community gathering' }
     ],
+    classes: [
+      { name: 'Quran Hifz', schedule: 'Mon-Fri, 5:00 PM', instructor: 'Hafiz Yusuf' },
+      { name: 'Islamic Studies', schedule: 'Sundays, 10:00 AM', instructor: 'Imam Ali' }
+    ],
+    imams: [
+      { name: 'Imam Ali Rahman', role: 'Head Imam', bio: 'Graduate of Islamic University with 10 years of experience.' }
+    ],
+    community: {
+      size: 'Approximately 300 families',
+      demographics: 'Diverse community with members from various cultural backgrounds',
+      languages: ['English', 'Arabic', 'Bengali']
+    },
+    history: 'Founded in 2005 by local community leaders. The masjid has grown significantly over the years.',
     gallery: [
       'https://images.unsplash.com/photo-1542379653-b926a529191d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1590517783952-87dd33983454?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
@@ -245,7 +262,7 @@ const MasjidDetails = () => {
               </div>
               <div className="flex items-center">
                 <Users className="h-4 w-4 mr-2" />
-                <span className="text-sm">{masjid.community.size}</span>
+                <span className="text-sm">{masjid.community?.size || 'Community'}</span>
               </div>
               <div className="flex items-center">
                 <Navigation className="h-4 w-4 mr-2" />
@@ -350,7 +367,7 @@ const MasjidDetails = () => {
                     </CardContent>
                   </Card>
                   
-                  {/* New section: Imams */}
+                  {/* Imams section - conditionally render */}
                   {masjid.imams && masjid.imams.length > 0 && (
                     <Card>
                       <CardContent className="pt-6">
@@ -401,12 +418,12 @@ const MasjidDetails = () => {
                           </div>
                         </div>
                         
-                        {/* Social Media Links */}
+                        {/* Social Media Links - conditionally render */}
                         {masjid.contact.socialMedia && (
                           <div className="flex items-center mt-2 gap-3 border-t pt-3">
                             {Object.entries(masjid.contact.socialMedia).map(([platform, url]) => (
                               <Button key={platform} variant="ghost" size="sm" className="p-1 h-auto">
-                                <a href={url} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-masjid-green">
+                                <a href={url as string} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-masjid-green">
                                   {platform.charAt(0).toUpperCase() + platform.slice(1)}
                                 </a>
                               </Button>
@@ -461,7 +478,7 @@ const MasjidDetails = () => {
                     </CardContent>
                   </Card>
                   
-                  {/* New section: Classes */}
+                  {/* Classes section - conditionally render */}
                   {masjid.classes && masjid.classes.length > 0 && (
                     <Card>
                       <CardContent className="pt-6">
@@ -600,85 +617,92 @@ const MasjidDetails = () => {
               </div>
             </TabsContent>
             
-            {/* Community Tab (New) */}
+            {/* Community Tab - conditionally render content */}
             <TabsContent value="community" className="animate-fade-in">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardContent className="pt-6">
-                    <h3 className="text-lg font-semibold mb-4">Community Information</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-medium text-masjid-dark">Size</h4>
-                        <p className="text-gray-600">{masjid.community.size}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-masjid-dark">Demographics</h4>
-                        <p className="text-gray-600">{masjid.community.demographics}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-masjid-dark">Languages</h4>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {masjid.community.languages.map((language, index) => (
-                            <Badge key={index} variant="outline" className="flex items-center">
-                              <Language className="h-3 w-3 mr-1" />
-                              {language}
-                            </Badge>
-                          ))}
+              {masjid.community ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardContent className="pt-6">
+                      <h3 className="text-lg font-semibold mb-4">Community Information</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-masjid-dark">Size</h4>
+                          <p className="text-gray-600">{masjid.community.size}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-masjid-dark">Demographics</h4>
+                          <p className="text-gray-600">{masjid.community.demographics}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-masjid-dark">Languages</h4>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {masjid.community.languages.map((language, index) => (
+                              <Badge key={index} variant="outline" className="flex items-center">
+                                <Languages className="h-3 w-3 mr-1" />
+                                {language}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-6">
-                    <h3 className="text-lg font-semibold mb-4">Get Involved</h3>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <h4 className="font-medium text-masjid-green">Volunteer Opportunities</h4>
-                        <p className="text-sm text-gray-600 mt-1">Join our team of volunteers to help with events, classes, and general operations.</p>
-                        <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Learn more</Button>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="pt-6">
+                      <h3 className="text-lg font-semibold mb-4">Get Involved</h3>
+                      <div className="space-y-3">
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <h4 className="font-medium text-masjid-green">Volunteer Opportunities</h4>
+                          <p className="text-sm text-gray-600 mt-1">Join our team of volunteers to help with events, classes, and general operations.</p>
+                          <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Learn more</Button>
+                        </div>
+                        
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <h4 className="font-medium text-masjid-green">Donation & Charity</h4>
+                          <p className="text-sm text-gray-600 mt-1">Support the masjid and community through donations and zakat contributions.</p>
+                          <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Donate now</Button>
+                        </div>
+                        
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <h4 className="font-medium text-masjid-green">Membership</h4>
+                          <p className="text-sm text-gray-600 mt-1">Become a member to participate in community decisions and receive updates.</p>
+                          <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Join today</Button>
+                        </div>
                       </div>
-                      
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <h4 className="font-medium text-masjid-green">Donation & Charity</h4>
-                        <p className="text-sm text-gray-600 mt-1">Support the masjid and community through donations and zakat contributions.</p>
-                        <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Donate now</Button>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Committees and Board */}
+                  <Card className="md:col-span-2">
+                    <CardContent className="pt-6">
+                      <h3 className="text-lg font-semibold mb-4">Committees & Leadership</h3>
+                      <p className="text-gray-600 mb-4">
+                        The masjid is managed by a board of trustees and various committees that handle different aspects of community operations.
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium text-masjid-dark">Board of Trustees</h4>
+                          <p className="text-sm text-gray-600 mt-1">Oversees general management and strategic direction.</p>
+                        </div>
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium text-masjid-dark">Education Committee</h4>
+                          <p className="text-sm text-gray-600 mt-1">Manages all educational programs and classes.</p>
+                        </div>
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium text-masjid-dark">Youth Committee</h4>
+                          <p className="text-sm text-gray-600 mt-1">Organizes activities and programs for young Muslims.</p>
+                        </div>
                       </div>
-                      
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <h4 className="font-medium text-masjid-green">Membership</h4>
-                        <p className="text-sm text-gray-600 mt-1">Become a member to participate in community decisions and receive updates.</p>
-                        <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Join today</Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                {/* New: Committees and Board */}
-                <Card className="md:col-span-2">
-                  <CardContent className="pt-6">
-                    <h3 className="text-lg font-semibold mb-4">Committees & Leadership</h3>
-                    <p className="text-gray-600 mb-4">
-                      The masjid is managed by a board of trustees and various committees that handle different aspects of community operations.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="border rounded-lg p-4">
-                        <h4 className="font-medium text-masjid-dark">Board of Trustees</h4>
-                        <p className="text-sm text-gray-600 mt-1">Oversees general management and strategic direction.</p>
-                      </div>
-                      <div className="border rounded-lg p-4">
-                        <h4 className="font-medium text-masjid-dark">Education Committee</h4>
-                        <p className="text-sm text-gray-600 mt-1">Manages all educational programs and classes.</p>
-                      </div>
-                      <div className="border rounded-lg p-4">
-                        <h4 className="font-medium text-masjid-dark">Youth Committee</h4>
-                        <p className="text-sm text-gray-600 mt-1">Organizes activities and programs for young Muslims.</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto text-gray-300" />
+                  <p className="mt-4 text-gray-500">Community information not available</p>
+                </div>
+              )}
             </TabsContent>
             
             {/* Photos Tab */}
