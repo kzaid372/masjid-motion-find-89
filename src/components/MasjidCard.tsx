@@ -1,10 +1,11 @@
 
-import React from 'react';
-import { MapPin, Star, Navigation, Clock, ExternalLink } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, Star, Navigation, Clock, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface MasjidCardProps {
   id: string;
@@ -19,6 +20,14 @@ interface MasjidCardProps {
     name: string;
     time: string;
   };
+  prayerTimes?: {
+    fajr: string;
+    dhuhr: string;
+    asr: string;
+    maghrib: string;
+    isha: string;
+    jummah: string;
+  };
 }
 
 const MasjidCard = ({
@@ -31,7 +40,9 @@ const MasjidCard = ({
   isFavorite = false,
   facilities = [],
   nextPrayer,
+  prayerTimes,
 }: MasjidCardProps) => {
+  const [showPrayerTimes, setShowPrayerTimes] = useState(false);
   
   const renderStars = (rating: number) => {
     return Array(5)
@@ -89,6 +100,59 @@ const MasjidCard = ({
       </CardHeader>
       
       <CardContent className="pb-2">
+        {prayerTimes && (
+          <Collapsible 
+            open={showPrayerTimes} 
+            onOpenChange={setShowPrayerTimes}
+            className="mt-2 border rounded-lg p-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-masjid-green flex items-center">
+                <Clock className="h-4 w-4 mr-1" />
+                Prayer Times
+              </span>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
+                  {showPrayerTimes ? (
+                    <ChevronUp className="h-4 w-4 text-masjid-green" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-masjid-green" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            
+            <CollapsibleContent className="mt-2 space-y-1">
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                <div className="flex justify-between border-b pb-1">
+                  <span className="font-medium">Fajr:</span>
+                  <span>{prayerTimes.fajr}</span>
+                </div>
+                <div className="flex justify-between border-b pb-1">
+                  <span className="font-medium">Dhuhr:</span>
+                  <span>{prayerTimes.dhuhr}</span>
+                </div>
+                <div className="flex justify-between border-b pb-1">
+                  <span className="font-medium">Asr:</span>
+                  <span>{prayerTimes.asr}</span>
+                </div>
+                <div className="flex justify-between border-b pb-1">
+                  <span className="font-medium">Maghrib:</span>
+                  <span>{prayerTimes.maghrib}</span>
+                </div>
+                <div className="flex justify-between border-b pb-1">
+                  <span className="font-medium">Isha:</span>
+                  <span>{prayerTimes.isha}</span>
+                </div>
+                <div className="flex justify-between border-b pb-1">
+                  <span className="font-medium">Jummah:</span>
+                  <span>{prayerTimes.jummah}</span>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+        
         {facilities.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {facilities.map((facility, index) => (

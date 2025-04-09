@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -29,14 +28,17 @@ import {
   ChevronRight,
   ParkingCircle,
   Accessibility,
-  School
+  School,
+  DollarSign,
+  CreditCard,
+  QrCode,
+  Banknote
 } from 'lucide-react';
 import Globe from '@/components/Globe';
 import SimpleMap from '@/components/SimpleMap';
 import { toast } from '@/components/ui/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-// Updated mock data with consistent structure for both masjids
 const masjidData = {
   '1': {
     id: '1',
@@ -153,7 +155,6 @@ const MasjidDetails = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   
-  // Get the masjid data from the mock data using the ID
   const masjid = masjidData[id as keyof typeof masjidData];
   
   if (!masjid) {
@@ -200,7 +201,6 @@ const MasjidDetails = () => {
   };
   
   const shareMasjid = () => {
-    // In a real app, this would use the Web Share API
     toast({
       title: "Share Masjid",
       description: `Sharing ${masjid.name} information.`,
@@ -221,12 +221,19 @@ const MasjidDetails = () => {
     });
   };
 
+  const handleDonate = (amount: number) => {
+    toast({
+      title: "Donation Started",
+      description: `Processing your donation of $${amount} to ${masjid.name}.`,
+    });
+    // In a real app, this would redirect to a payment processor
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-grow pt-16">
-        {/* Hero Section with Masjid Image */}
         <div className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden">
           <img 
             src={masjid.imageUrl} 
@@ -248,7 +255,6 @@ const MasjidDetails = () => {
           </div>
         </div>
         
-        {/* Quick Info Bar */}
         <div className="bg-masjid-green text-white">
           <div className="container mx-auto px-4 py-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -272,7 +278,6 @@ const MasjidDetails = () => {
           </div>
         </div>
         
-        {/* Action Buttons */}
         <div className="bg-white shadow-md">
           <div className="container mx-auto px-4 py-4 flex justify-between overflow-x-auto">
             <Button variant="outline" onClick={getDirections} className="whitespace-nowrap">
@@ -294,10 +299,9 @@ const MasjidDetails = () => {
           </div>
         </div>
         
-        {/* Content Tabs */}
         <div className="container mx-auto px-4 py-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="info">
                 <Info className="h-4 w-4 mr-2" />
                 Info
@@ -314,13 +318,16 @@ const MasjidDetails = () => {
                 <Users className="h-4 w-4 mr-2" />
                 Community
               </TabsTrigger>
+              <TabsTrigger value="donate">
+                <DollarSign className="h-4 w-4 mr-2" />
+                Donate
+              </TabsTrigger>
               <TabsTrigger value="photos">
-                <Users className="h-4 w-4 mr-2" />
+                <Book className="h-4 w-4 mr-2" />
                 Photos
               </TabsTrigger>
             </TabsList>
             
-            {/* Info Tab */}
             <TabsContent value="info" className="animate-fade-in">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-6">
@@ -367,7 +374,6 @@ const MasjidDetails = () => {
                     </CardContent>
                   </Card>
                   
-                  {/* Imams section - conditionally render */}
                   {masjid.imams && masjid.imams.length > 0 && (
                     <Card>
                       <CardContent className="pt-6">
@@ -418,7 +424,6 @@ const MasjidDetails = () => {
                           </div>
                         </div>
                         
-                        {/* Social Media Links - conditionally render */}
                         {masjid.contact.socialMedia && (
                           <div className="flex items-center mt-2 gap-3 border-t pt-3">
                             {Object.entries(masjid.contact.socialMedia).map(([platform, url]) => (
@@ -478,7 +483,6 @@ const MasjidDetails = () => {
                     </CardContent>
                   </Card>
                   
-                  {/* Classes section - conditionally render */}
                   {masjid.classes && masjid.classes.length > 0 && (
                     <Card>
                       <CardContent className="pt-6">
@@ -517,7 +521,6 @@ const MasjidDetails = () => {
               </div>
             </TabsContent>
             
-            {/* Prayer Times Tab */}
             <TabsContent value="prayer-times" className="animate-fade-in">
               <Card>
                 <CardContent className="pt-6">
@@ -531,7 +534,6 @@ const MasjidDetails = () => {
                     ))}
                   </div>
                   
-                  {/* Additional Prayer Time Notes */}
                   <div className="mt-8 bg-gray-50 p-4 rounded-lg">
                     <h4 className="font-medium mb-2 flex items-center">
                       <Info className="h-4 w-4 mr-2 text-masjid-green" />
@@ -564,7 +566,6 @@ const MasjidDetails = () => {
               </Card>
             </TabsContent>
             
-            {/* Events Tab */}
             <TabsContent value="events" className="animate-fade-in">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -617,7 +618,6 @@ const MasjidDetails = () => {
               </div>
             </TabsContent>
             
-            {/* Community Tab - conditionally render content */}
             <TabsContent value="community" className="animate-fade-in">
               {masjid.community ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -673,7 +673,6 @@ const MasjidDetails = () => {
                     </CardContent>
                   </Card>
                   
-                  {/* Committees and Board */}
                   <Card className="md:col-span-2">
                     <CardContent className="pt-6">
                       <h3 className="text-lg font-semibold mb-4">Committees & Leadership</h3>
@@ -705,7 +704,134 @@ const MasjidDetails = () => {
               )}
             </TabsContent>
             
-            {/* Photos Tab */}
+            <TabsContent value="donate" className="animate-fade-in">
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="text-xl font-semibold mb-6 text-center">Support {masjid.name}</h3>
+                  <p className="text-center text-gray-600 mb-6">
+                    Your generous donations help maintain our masjid and support community programs.
+                    All donations are tax-deductible.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <h4 className="text-lg font-medium mb-4 text-masjid-dark">One-Time Donation</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[10, 25, 50, 100, 250, 500].map((amount) => (
+                          <Button 
+                            key={amount} 
+                            variant="outline" 
+                            onClick={() => handleDonate(amount)}
+                            className="border-masjid-green text-masjid-green hover:bg-masjid-green/10 h-16"
+                          >
+                            <DollarSign className="mr-1 h-4 w-4" />
+                            {amount}
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      <div className="mt-6">
+                        <h5 className="font-medium text-sm mb-2">Custom Amount</h5>
+                        <div className="flex">
+                          <div className="relative flex-grow">
+                            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                            <input 
+                              type="number" 
+                              className="w-full pl-10 py-2 border rounded-l-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
+                              placeholder="Other amount"
+                            />
+                          </div>
+                          <Button 
+                            className="bg-masjid-green hover:bg-masjid-green/90 rounded-l-none"
+                            onClick={() => handleDonate(0)}
+                          >
+                            Donate
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-lg font-medium mb-4 text-masjid-dark">Payment Methods</h4>
+                      <div className="space-y-4">
+                        <div className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                          <div className="flex items-center">
+                            <CreditCard className="h-5 w-5 mr-3 text-masjid-green" />
+                            <div>
+                              <p className="font-medium">Credit/Debit Card</p>
+                              <p className="text-sm text-gray-600">Secure payment via Stripe</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                          <div className="flex items-center">
+                            <Banknote className="h-5 w-5 mr-3 text-masjid-green" />
+                            <div>
+                              <p className="font-medium">Bank Transfer</p>
+                              <p className="text-sm text-gray-600">Direct deposit to our account</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                          <div className="flex items-center">
+                            <QrCode className="h-5 w-5 mr-3 text-masjid-green" />
+                            <div>
+                              <p className="font-medium">QR Code Payment</p>
+                              <p className="text-sm text-gray-600">Scan with your banking app</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-6 bg-green-50 p-4 rounded-lg">
+                        <h5 className="font-medium flex items-center text-masjid-green">
+                          <Info className="h-4 w-4 mr-2" />
+                          Monthly Giving Program
+                        </h5>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Support our masjid consistently by joining our monthly donation program.
+                        </p>
+                        <Button variant="outline" className="mt-3 border-masjid-green text-masjid-green hover:bg-masjid-green/10">
+                          Learn More
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-8 border-t pt-6">
+                    <h4 className="text-lg font-medium mb-4 text-center text-masjid-dark">Where Your Donations Go</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-green-50 p-4 rounded-lg text-center">
+                        <Book className="h-8 w-8 mx-auto text-masjid-green mb-2" />
+                        <h5 className="font-medium text-masjid-green">Educational Programs</h5>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Supporting Quran classes and Islamic education for all ages
+                        </p>
+                      </div>
+                      
+                      <div className="bg-green-50 p-4 rounded-lg text-center">
+                        <ParkingCircle className="h-8 w-8 mx-auto text-masjid-green mb-2" />
+                        <h5 className="font-medium text-masjid-green">Facility Maintenance</h5>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Keeping our masjid clean, beautiful, and well-maintained
+                        </p>
+                      </div>
+                      
+                      <div className="bg-green-50 p-4 rounded-lg text-center">
+                        <Users className="h-8 w-8 mx-auto text-masjid-green mb-2" />
+                        <h5 className="font-medium text-masjid-green">Community Services</h5>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Support for community events, programs, and charitable services
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
             <TabsContent value="photos" className="animate-fade-in">
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold">Photo Gallery</h3>
@@ -717,7 +843,6 @@ const MasjidDetails = () => {
                   ))}
                 </div>
                 
-                {/* Additional gallery info */}
                 <div className="text-center mt-6">
                   <p className="text-gray-600 mb-3">View our complete gallery to see more of our beautiful masjid and community events.</p>
                   <Button variant="default" className="bg-masjid-green hover:bg-masjid-green/90">

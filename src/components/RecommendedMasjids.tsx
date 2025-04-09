@@ -16,6 +16,14 @@ const recommendedMasjids = [
       name: 'Asr',
       time: '4:30 PM',
     },
+    prayerTimes: {
+      fajr: '5:30 AM',
+      dhuhr: '1:00 PM',
+      asr: '4:30 PM',
+      maghrib: '7:15 PM',
+      isha: '8:45 PM',
+      jummah: '1:30 PM'
+    }
   },
   {
     id: '2',
@@ -29,6 +37,14 @@ const recommendedMasjids = [
       name: 'Asr',
       time: '4:35 PM',
     },
+    prayerTimes: {
+      fajr: '5:25 AM',
+      dhuhr: '1:05 PM',
+      asr: '4:35 PM',
+      maghrib: '7:10 PM',
+      isha: '8:40 PM',
+      jummah: '1:20 PM'
+    }
   },
   {
     id: '3',
@@ -42,6 +58,14 @@ const recommendedMasjids = [
       name: 'Asr',
       time: '4:32 PM',
     },
+    prayerTimes: {
+      fajr: '5:20 AM',
+      dhuhr: '1:10 PM',
+      asr: '4:32 PM',
+      maghrib: '7:12 PM',
+      isha: '8:50 PM',
+      jummah: '1:15 PM'
+    }
   },
 ];
 
