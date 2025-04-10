@@ -24,7 +24,7 @@ export const useNearbyMasjids = () => {
             description: "Could not access your location. Using default location.",
             variant: "destructive",
           });
-          setUserLocation({ lat: 40.7128, lng: -74.0060 });
+          setUserLocation({ lat: 40.7128, lng: -74.0060 }); // Default to NYC
         }
       );
     }
@@ -40,11 +40,7 @@ export const useNearbyMasjids = () => {
       },
       onError: (error: Error) => {
         console.error("Error fetching nearby masjids:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch nearby masjids. Please try again.",
-          variant: "destructive",
-        });
+        // Toast notification already handled in the API call
       }
     }
   });

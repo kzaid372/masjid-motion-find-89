@@ -1,12 +1,13 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   MapPin, 
   Navigation, 
@@ -38,124 +39,64 @@ import Globe from '@/components/Globe';
 import SimpleMap from '@/components/SimpleMap';
 import { toast } from '@/components/ui/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
-const masjidData = {
-  '1': {
-    id: '1',
-    name: 'Al-Noor Mosque',
-    address: '123 Islamic Way, New York, NY 10001',
-    description: 'A beautiful mosque serving the local Muslim community with daily prayers, educational programs, and community events. The masjid was established in 1995 and has since been a cornerstone of the Muslim community in New York. The architecture features traditional Islamic design elements with modern amenities to serve the needs of all worshippers.',
-    distance: '1.2 km',
-    rating: 4.5,
-    imageUrl: 'https://images.unsplash.com/photo-1545167496-28be8f7a29e6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-    facilities: ['Parking', 'Wudhu Area', 'Women Section', 'Library', 'Quran Classes', 'Wheelchair Access', 'Free Wifi', 'Shoe Racks', 'Islamic Bookstore', 'Cafeteria'],
-    prayerTimes: {
-      fajr: '5:30 AM',
-      dhuhr: '1:00 PM',
-      asr: '4:30 PM',
-      maghrib: '7:15 PM',
-      isha: '8:45 PM',
-      jummah: '1:30 PM'
-    },
-    contact: {
-      phone: '+1 (555) 123-4567',
-      email: 'info@alnoor.mosque',
-      website: 'www.alnoor.mosque',
-      socialMedia: {
-        facebook: 'facebook.com/alnoor',
-        instagram: 'instagram.com/alnoor',
-        twitter: 'twitter.com/alnoor'
-      }
-    },
-    events: [
-      { id: '1', title: 'Ramadan Iftar', date: 'Every day during Ramadan', description: 'Community iftar gathering' },
-      { id: '2', title: 'Quran Study Circle', date: 'Tuesdays, 7:00 PM', description: 'Weekly Quran study and discussion' },
-      { id: '3', title: 'Youth Program', date: 'Saturdays, 4:00 PM', description: 'Activities for Muslim youth' },
-      { id: '4', title: 'Islamic History Class', date: 'Sundays, 11:00 AM', description: 'Learn about Islamic history and civilization' },
-      { id: '5', title: 'Women\'s Halaqah', date: 'Wednesdays, 6:00 PM', description: 'Women\'s religious discussion group' }
-    ],
-    classes: [
-      { name: 'Quran Recitation', schedule: 'Mon-Fri, 6:00 PM', instructor: 'Sheikh Ahmad' },
-      { name: 'Fiqh Basics', schedule: 'Saturdays, 2:00 PM', instructor: 'Dr. Fatima Hassan' },
-      { name: 'Arabic Language', schedule: 'Tue & Thu, 7:00 PM', instructor: 'Ustadh Khalid' },
-      { name: 'Islamic History', schedule: 'Sundays, 11:00 AM', instructor: 'Prof. Ibrahim' }
-    ],
-    imams: [
-      { name: 'Imam Abdullah Hasan', role: 'Head Imam', bio: 'Graduate of Al-Azhar University with 15 years of experience.' },
-      { name: 'Sheikh Muhammad Ali', role: 'Assistant Imam', bio: 'Graduate of Islamic University of Madinah, specializing in Hadith studies.' }
-    ],
-    community: {
-      size: 'Approximately 500 families',
-      demographics: 'Diverse community with members from various cultural backgrounds',
-      languages: ['English', 'Arabic', 'Urdu', 'Turkish']
-    },
-    history: 'Founded in 1995 by a group of local Muslim families seeking a place of worship. The current building was constructed in 2005 after extensive fundraising efforts. The masjid has expanded its services over the years to include educational programs, community services, and various facilities.',
-    gallery: [
-      'https://images.unsplash.com/photo-1545167496-28be8f7a29e6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1542379653-b926a529191d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1609158762357-c6f0c931ace5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1585129918930-69bae9bb0b04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1626079651101-d4eeff9c9be9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1576439243014-f4732fbcb5fc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'
-    ]
-  },
-  '2': {
-    id: '2',
-    name: 'Masjid Al-Rahman',
-    address: '456 Faith Street, New York, NY 10002',
-    description: 'Masjid Al-Rahman is dedicated to serving the religious, social, and educational needs of Muslims in the New York area.',
-    distance: '2.5 km',
-    rating: 4.8,
-    imageUrl: 'https://images.unsplash.com/photo-1542379653-b926a529191d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-    facilities: ['Library', 'Prayer Mats', 'AC', 'Women Section', 'Parking'],
-    prayerTimes: {
-      fajr: '5:25 AM',
-      dhuhr: '1:05 PM',
-      asr: '4:35 PM',
-      maghrib: '7:10 PM',
-      isha: '8:40 PM',
-      jummah: '1:20 PM'
-    },
-    contact: {
-      phone: '+1 (555) 987-6543',
-      email: 'contact@alrahman.mosque',
-      website: 'www.alrahman.mosque',
-      socialMedia: {
-        facebook: 'facebook.com/alrahman',
-        instagram: 'instagram.com/alrahman'
-      }
-    },
-    events: [
-      { id: '1', title: 'Islamic Studies Class', date: 'Wednesdays, 7:30 PM', description: 'Weekly lessons on Islamic teachings' },
-      { id: '2', title: 'Community Dinner', date: 'Last Saturday of each month', description: 'Monthly community gathering' }
-    ],
-    classes: [
-      { name: 'Quran Hifz', schedule: 'Mon-Fri, 5:00 PM', instructor: 'Hafiz Yusuf' },
-      { name: 'Islamic Studies', schedule: 'Sundays, 10:00 AM', instructor: 'Imam Ali' }
-    ],
-    imams: [
-      { name: 'Imam Ali Rahman', role: 'Head Imam', bio: 'Graduate of Islamic University with 10 years of experience.' }
-    ],
-    community: {
-      size: 'Approximately 300 families',
-      demographics: 'Diverse community with members from various cultural backgrounds',
-      languages: ['English', 'Arabic', 'Bengali']
-    },
-    history: 'Founded in 2005 by local community leaders. The masjid has grown significantly over the years.',
-    gallery: [
-      'https://images.unsplash.com/photo-1542379653-b926a529191d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1590517783952-87dd33983454?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1588855318558-b34127079006?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'
-    ]
-  }
-};
+import { MasjidApi, PrayerTimesApi } from '@/services/api';
 
 const MasjidDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   
-  const masjid = masjidData[id as keyof typeof masjidData];
+  const { data: masjid, isLoading } = useQuery({
+    queryKey: ['masjid', id],
+    queryFn: () => id ? MasjidApi.getById(id) : Promise.reject('No ID provided'),
+    enabled: !!id,
+  });
+  
+  const { data: prayerTimes } = useQuery({
+    queryKey: ['prayerTimes', masjid?.location],
+    queryFn: () => {
+      if (!masjid?.location) return Promise.reject('No location available');
+      const lat = masjid.location.coordinates?.[1] || 0;
+      const lng = masjid.location.coordinates?.[0] || 0;
+      return PrayerTimesApi.getForLocation(lat, lng);
+    },
+    enabled: !!masjid?.location,
+  });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow pt-16 container mx-auto px-4 py-8">
+          <Skeleton className="h-64 w-full mb-4" />
+          <Skeleton className="h-10 w-3/4 mb-2" />
+          <Skeleton className="h-6 w-1/2 mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <Skeleton className="h-32 w-full mb-4" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+            <div>
+              <Skeleton className="h-64 w-full" />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
   
   if (!masjid) {
     return (
@@ -221,6 +162,79 @@ const MasjidDetails = () => {
     });
     // In a real app, this would redirect to a payment processor
   };
+  
+  const getResponsiveTabsList = () => {
+    const allTabs = [
+      { value: 'info', label: 'Info', icon: <Info className="h-4 w-4 mr-2" /> },
+      { value: 'prayer-times', label: 'Prayer Times', icon: <Clock className="h-4 w-4 mr-2" /> },
+      { value: 'events', label: 'Events', icon: <Calendar className="h-4 w-4 mr-2" /> },
+      { value: 'community', label: 'Community', icon: <Users className="h-4 w-4 mr-2" /> },
+      { value: 'donate', label: 'Donate', icon: <DollarSign className="h-4 w-4 mr-2" /> },
+      { value: 'photos', label: 'Photos', icon: <Book className="h-4 w-4 mr-2" /> }
+    ];
+    
+    if (screenWidth < 640) {
+      return (
+        <TabsList className="grid w-full grid-cols-6">
+          {allTabs.map(tab => (
+            <TabsTrigger key={tab.value} value={tab.value} className="px-2">
+              {tab.icon}
+              <span className="sr-only">{tab.label}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      );
+    }
+    
+    if (screenWidth < 768) {
+      return (
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="info">
+            <Info className="h-4 w-4 mr-2" />
+            Info
+          </TabsTrigger>
+          <TabsTrigger value="prayer-times">
+            <Clock className="h-4 w-4 mr-2" />
+            Prayer Times
+          </TabsTrigger>
+          <TabsTrigger value="more" onClick={() => {
+            toast({
+              title: "More Options",
+              description: "Select from Events, Community, Donate, or Photos",
+              action: (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {['events', 'community', 'donate', 'photos'].map(tab => (
+                    <Button 
+                      key={tab} 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </Button>
+                  ))}
+                </div>
+              )
+            });
+          }}>
+            <ChevronRight className="h-4 w-4 mr-2" />
+            More
+          </TabsTrigger>
+        </TabsList>
+      );
+    }
+    
+    return (
+      <TabsList className="grid w-full grid-cols-6">
+        {allTabs.map(tab => (
+          <TabsTrigger key={tab.value} value={tab.value}>
+            {tab.icon}
+            {tab.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -253,11 +267,11 @@ const MasjidDetails = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div className="flex items-center">
                 <Clock className="h-4 w-4 mr-2" />
-                <span className="text-sm">Next: {Object.keys(masjid.prayerTimes)[0]} {masjid.prayerTimes.fajr}</span>
+                <span className="text-sm">Next: {masjid.nextPrayer?.name || 'Fajr'} {masjid.nextPrayer?.time || prayerTimes?.fajr || '5:30 AM'}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
-                <span className="text-sm">Jummah: {masjid.prayerTimes.jummah}</span>
+                <span className="text-sm">Jummah: {masjid.prayerTimes?.jummah || '1:30 PM'}</span>
               </div>
               <div className="flex items-center">
                 <Users className="h-4 w-4 mr-2" />
@@ -290,32 +304,7 @@ const MasjidDetails = () => {
         
         <div className="container mx-auto px-4 py-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="info">
-                <Info className="h-4 w-4 mr-2" />
-                Info
-              </TabsTrigger>
-              <TabsTrigger value="prayer-times">
-                <Clock className="h-4 w-4 mr-2" />
-                Prayer Times
-              </TabsTrigger>
-              <TabsTrigger value="events">
-                <Calendar className="h-4 w-4 mr-2" />
-                Events
-              </TabsTrigger>
-              <TabsTrigger value="community">
-                <Users className="h-4 w-4 mr-2" />
-                Community
-              </TabsTrigger>
-              <TabsTrigger value="donate">
-                <DollarSign className="h-4 w-4 mr-2" />
-                Donate
-              </TabsTrigger>
-              <TabsTrigger value="photos">
-                <Book className="h-4 w-4 mr-2" />
-                Photos
-              </TabsTrigger>
-            </TabsList>
+            {getResponsiveTabsList()}
             
             <TabsContent value="info" className="animate-fade-in">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -515,12 +504,16 @@ const MasjidDetails = () => {
                 <CardContent className="pt-6">
                   <h3 className="text-xl font-semibold mb-6 text-center">Daily Prayer Times</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {Object.entries(masjid.prayerTimes).map(([prayer, time]) => (
-                      <div key={prayer} className="bg-green-50 rounded-lg p-4 text-center border border-masjid-green/20">
-                        <h4 className="text-masjid-green font-medium capitalize">{prayer}</h4>
-                        <p className="text-lg font-bold mt-1">{time}</p>
-                      </div>
-                    ))}
+                    {Object.entries(prayerTimes || masjid.prayerTimes || {}).map(([prayer, time]) => {
+                      if (['date', 'location'].includes(prayer)) return null;
+                      
+                      return (
+                        <div key={prayer} className="bg-green-50 rounded-lg p-4 text-center border border-masjid-green/20">
+                          <h4 className="text-masjid-green font-medium capitalize">{prayer}</h4>
+                          <p className="text-lg font-bold mt-1">{time as string}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                   
                   <div className="mt-8 bg-gray-50 p-4 rounded-lg">
