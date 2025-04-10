@@ -12,10 +12,10 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const db = getDb();
     const masjids = await db.collection('masjids').find({}).toArray();
-    return res.json(masjids);
+    res.json(masjids);
   } catch (error) {
     console.error('Error getting masjids:', error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -65,10 +65,10 @@ router.get('/nearby', async (req: Request, res: Response) => {
     // Limit results
     .slice(0, parseInt(limit as string));
     
-    return res.json(nearbyMasjids);
+    res.json(nearbyMasjids);
   } catch (error) {
     console.error('Error getting nearby masjids:', error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -84,10 +84,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Masjid not found' });
     }
     
-    return res.json(masjid);
+    res.json(masjid);
   } catch (error) {
     console.error('Error getting masjid:', error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -111,10 +111,10 @@ router.post('/save/:id', verifyAuth, async (req: Request, res: Response) => {
       { $addToSet: { savedMasjids: new ObjectId(id) } }
     );
     
-    return res.json({ success: true });
+    res.json({ success: true });
   } catch (error) {
     console.error('Error saving masjid:', error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -131,10 +131,10 @@ router.delete('/save/:id', verifyAuth, async (req: Request, res: Response) => {
       { $pull: { savedMasjids: new ObjectId(id) } }
     );
     
-    return res.json({ success: true });
+    res.json({ success: true });
   } catch (error) {
     console.error('Error removing saved masjid:', error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
