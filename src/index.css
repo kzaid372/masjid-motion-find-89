@@ -209,4 +209,57 @@
   .glass-effect {
     @apply bg-white/90 backdrop-blur-sm dark:bg-gray-800/70;
   }
+
+  /* Enhanced button hover effects */
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  /* New text gradient effect */
+  .text-gradient {
+    @apply bg-gradient-to-r from-masjid-green to-masjid-blue bg-clip-text text-transparent;
+  }
+  
+  /* Enhanced card styling */
+  .enhanced-card {
+    @apply rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1;
+  }
+  
+  /* Shimmer effect */
+  .shimmer {
+    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent;
+  }
+}
+
+/* Extended animations */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: floating 6s ease-in-out infinite;
+}
+
+/* Hover scale transformation */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
