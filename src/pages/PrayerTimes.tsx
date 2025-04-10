@@ -55,7 +55,7 @@ const PrayerTimes = () => {
   // Query for prayer times
   const { data: prayerTimesData, isLoading: isLoadingPrayerTimes } = useQuery({
     queryKey: ['prayerTimes', coordinates?.lat, coordinates?.lng],
-    queryFn: () => coordinates ? PrayerTimesApi.getForLocation(coordinates.lat, coordinates.lng) : Promise.resolve(null),
+    queryFn: () => coordinates ? PrayerTimesApi.getByLocation(coordinates.lat, coordinates.lng) : Promise.resolve(null),
     enabled: !!coordinates,
     meta: {
       onError: () => {
