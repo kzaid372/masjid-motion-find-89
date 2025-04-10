@@ -15,7 +15,7 @@ const Index = () => {
 
   return (
     <motion.div 
-      className="min-h-screen"
+      className="min-h-screen dark:bg-gray-950"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
