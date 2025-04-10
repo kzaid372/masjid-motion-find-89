@@ -5,7 +5,8 @@ import {
   signInWithPopup, 
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser
+  User as FirebaseUser,
+  getIdToken
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/config/firebase';
 
@@ -14,6 +15,7 @@ interface User {
   email: string | null;
   displayName: string | null;
   photoURL?: string | null;
+  token?: string; // Add token for API authentication
 }
 
 interface AuthContextType {
@@ -37,34 +39,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Convert Firebase user to our User interface
-  const formatUser = (firebaseUser: FirebaseUser): User => ({
-    id: firebaseUser.uid,
-    email: firebaseUser.email,
-    displayName: firebaseUser.displayName || 'User',
-    photoURL: firebaseUser.photoURL,
-  });
+  // Convert Firebase user to our User interface and get token
+  const formatUser = async (firebaseUser: FirebaseUser): Promise<User> => {
+    const token = await getIdToken(firebaseUser);
+    
+    // Store user data and token in localStorage
+    const userData = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email,
+      displayName: firebaseUser.displayName || 'User',
+      photoURL: firebaseUser.photoURL,
+      token
+    };
+    
+    localStorage.setItem('user', JSON.stringify(userData));
+    
+    return userData;
+  };
 
   // Listen for auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        setUser(formatUser(firebaseUser));
+        const formattedUser = await formatUser(firebaseUser);
+        setUser(formattedUser);
       } else {
         setUser(null);
+        localStorage.removeItem('user');
       }
       setLoading(false);
     });
+
+    // Check localStorage for existing user
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
-  // Real Google sign in function using Firebase
+  // Google sign in function using Firebase
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      await formatUser(result.user);
       
       toast({
         title: "Success!",
@@ -86,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       await firebaseSignOut(auth);
+      localStorage.removeItem('user');
       
       toast({
         title: "Signed out",

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SearchBar from '@/components/SearchBar';
@@ -11,123 +10,111 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapPin, List, MapIcon, Filter, Navigation } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
-
-const nearbyMasjids = [
-  {
-    id: '1',
-    name: 'Al-Noor Mosque',
-    address: '123 Islamic Way, New York, NY 10001',
-    distance: '1.2 km',
-    rating: 4.5,
-    imageUrl: 'https://images.unsplash.com/photo-1545167496-28be8f7a29e6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-    facilities: ['Parking', 'Wudhu Area', 'Women Section'],
-    nextPrayer: {
-      name: 'Asr',
-      time: '4:30 PM',
-    },
-    prayerTimes: {
-      fajr: '5:30 AM',
-      dhuhr: '1:00 PM',
-      asr: '4:30 PM',
-      maghrib: '7:15 PM',
-      isha: '8:45 PM',
-      jummah: '1:30 PM'
-    }
-  },
-  {
-    id: '2',
-    name: 'Masjid Al-Rahman',
-    address: '456 Faith Street, New York, NY 10002',
-    distance: '2.5 km',
-    rating: 4.8,
-    imageUrl: 'https://images.unsplash.com/photo-1542379653-b926a529191d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-    facilities: ['Library', 'Prayer Mats', 'AC'],
-    nextPrayer: {
-      name: 'Asr',
-      time: '4:35 PM',
-    },
-    prayerTimes: {
-      fajr: '5:25 AM',
-      dhuhr: '1:05 PM',
-      asr: '4:35 PM',
-      maghrib: '7:10 PM',
-      isha: '8:40 PM',
-      jummah: '1:20 PM'
-    }
-  },
-  {
-    id: '3',
-    name: 'Islamic Center',
-    address: '789 Deen Avenue, New York, NY 10003',
-    distance: '3.0 km',
-    rating: 4.2,
-    imageUrl: 'https://images.unsplash.com/photo-1609158762357-c6f0c931ace5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-    facilities: ['Quran Classes', 'Cafe', 'Wheelchair Access'],
-    nextPrayer: {
-      name: 'Asr',
-      time: '4:32 PM',
-    },
-    prayerTimes: {
-      fajr: '5:20 AM',
-      dhuhr: '1:10 PM',
-      asr: '4:32 PM',
-      maghrib: '7:12 PM',
-      isha: '8:50 PM',
-      jummah: '1:15 PM'
-    }
-  },
-  {
-    id: '4',
-    name: 'Al-Falah Mosque',
-    address: '101 Barakah Blvd, New York, NY 10004',
-    distance: '3.8 km',
-    rating: 4.0,
-    imageUrl: 'https://images.unsplash.com/photo-1591022364707-34ee5cffecdb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-    facilities: ['Parking', 'Kids Area'],
-    nextPrayer: {
-      name: 'Asr',
-      time: '4:33 PM',
-    },
-    prayerTimes: {
-      fajr: '5:18 AM',
-      dhuhr: '1:15 PM',
-      asr: '4:33 PM',
-      maghrib: '7:13 PM',
-      isha: '8:55 PM',
-      jummah: '1:25 PM'
-    }
-  },
-];
+import { MasjidApi } from '@/services/api';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
 
 const FindMasjid = () => {
-  const [searchResults, setSearchResults] = useState(nearbyMasjids);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [view, setView] = useState<'map' | 'list'>('map');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterOptions | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const { user } = useAuth();
   
-  const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
-    setSearchResults(nearbyMasjids);
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          toast({
+            title: "Location Error",
+            description: "Could not access your location. Using default location.",
+            variant: "destructive",
+          });
+          setUserLocation({ lat: 40.7128, lng: -74.0060 });
+        }
+      );
+    }
+  }, []);
+  
+  const { data: nearbyMasjids, isLoading: isLoadingNearby, refetch } = useQuery({
+    queryKey: ['nearbyMasjids', userLocation],
+    queryFn: () => userLocation ? MasjidApi.getNearby(userLocation.lat, userLocation.lng, 5) : Promise.resolve([]),
+    enabled: !!userLocation,
+    onSuccess: (data) => {
+      setSearchResults(data);
+    },
+    onError: (error) => {
+      console.error("Error fetching nearby masjids:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch nearby masjids. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    
+    if (!query.trim()) {
+      if (nearbyMasjids) {
+        setSearchResults(nearbyMasjids);
+      }
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const results = await MasjidApi.search(query);
+      setSearchResults(results);
+      toast({
+        title: "Search Results",
+        description: `Found ${results.length} masjids matching "${query}"`,
+      });
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const findNearbyMasjids = () => {
     setIsLoading(true);
     
-    setTimeout(() => {
-      toast({
-        title: "Found Nearby Masjids",
-        description: "We've found 4 masjids near your current location.",
+    if (userLocation) {
+      refetch().then(() => {
+        toast({
+          title: "Found Nearby Masjids",
+          description: `We've found ${nearbyMasjids?.length || 0} masjids near your current location.`,
+        });
+        setIsLoading(false);
       });
-      setSearchResults(nearbyMasjids);
+    } else {
+      toast({
+        title: "Location Error",
+        description: "Could not access your location. Please enable location services.",
+        variant: "destructive",
+      });
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const applyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);
     
     console.log('Applied filters:', filters);
+    
+    if (!nearbyMasjids) return;
     
     const filteredResults = nearbyMasjids.filter(masjid => {
       const distanceNum = parseFloat(masjid.distance.split(' ')[0]);
@@ -166,10 +153,10 @@ const FindMasjid = () => {
               <Button 
                 onClick={findNearbyMasjids}
                 className="w-full sm:w-auto bg-masjid-gold hover:bg-masjid-gold/90 text-white" 
-                disabled={isLoading}
+                disabled={isLoading || isLoadingNearby}
               >
                 <Navigation className="mr-2 h-4 w-4" />
-                {isLoading ? 'Finding...' : 'Find Nearby'}
+                {isLoading || isLoadingNearby ? 'Finding...' : 'Find Nearby'}
               </Button>
             </div>
             
@@ -217,7 +204,7 @@ const FindMasjid = () => {
                   size="sm" 
                   onClick={() => {
                     setActiveFilters(null);
-                    setSearchResults(nearbyMasjids);
+                    if (nearbyMasjids) setSearchResults(nearbyMasjids);
                   }}
                   className="text-masjid-green hover:text-masjid-green/80 h-8"
                 >
@@ -229,21 +216,38 @@ const FindMasjid = () => {
           
           {view === 'map' ? (
             <div className="space-y-8">
-              <SimpleMap />
+              <SimpleMap masjids={searchResults} userLocation={userLocation} />
               
               <div>
                 <h2 className="text-xl font-semibold mb-4 text-masjid-dark dark:text-white">Mosques Near You</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {searchResults.map((masjid) => (
-                    <motion.div 
-                      key={masjid.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <MasjidCard {...masjid} />
-                    </motion.div>
-                  ))}
+                  {searchResults.length > 0 ? (
+                    searchResults.map((masjid) => (
+                      <motion.div 
+                        key={masjid._id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <MasjidCard {...masjid} />
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12">
+                      <p className="text-gray-500 dark:text-gray-400">
+                        {isLoadingNearby ? 'Loading masjids...' : 'No masjids found in this area.'}
+                      </p>
+                      {!isLoadingNearby && (
+                        <Button 
+                          variant="outline" 
+                          className="mt-4"
+                          onClick={findNearbyMasjids}
+                        >
+                          Retry Search
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -252,7 +256,7 @@ const FindMasjid = () => {
               {searchResults.length > 0 ? (
                 searchResults.map((masjid) => (
                   <motion.div 
-                    key={masjid.id}
+                    key={masjid._id}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
@@ -262,17 +266,21 @@ const FindMasjid = () => {
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <p className="text-gray-500 dark:text-gray-400">No masjids found matching your criteria.</p>
-                  <Button 
-                    variant="outline" 
-                    className="mt-4"
-                    onClick={() => {
-                      setActiveFilters(null);
-                      setSearchResults(nearbyMasjids);
-                    }}
-                  >
-                    Reset Filters
-                  </Button>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {isLoadingNearby ? 'Loading masjids...' : 'No masjids found matching your criteria.'}
+                  </p>
+                  {!isLoadingNearby && activeFilters && (
+                    <Button 
+                      variant="outline" 
+                      className="mt-4"
+                      onClick={() => {
+                        setActiveFilters(null);
+                        if (nearbyMasjids) setSearchResults(nearbyMasjids);
+                      }}
+                    >
+                      Reset Filters
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
