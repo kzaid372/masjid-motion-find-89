@@ -34,9 +34,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     // Save theme preference to localStorage
     localStorage.setItem('theme', theme);
+
+    // Adding a small delay to allow animations to complete smoothly
+    const timer = setTimeout(() => {
+      document.body.style.transition = '';
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [theme]);
 
   const toggleTheme = () => {
+    // Add transition for smooth theme change
+    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
