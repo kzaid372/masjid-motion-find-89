@@ -1,843 +1,610 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { 
-  MapPin, 
-  Navigation, 
-  Clock, 
-  Calendar, 
-  Star, 
-  Heart, 
-  Share2, 
-  Phone, 
-  Mail, 
-  Users, 
-  Wifi, 
-  Car,
-  Info,
-  Book,
-  UserCheck,
-  Languages,
-  Utensils,
-  ChevronRight,
-  ParkingCircle,
-  Accessibility,
-  School,
-  DollarSign,
-  CreditCard,
-  QrCode,
-  Banknote
+  MapPin, Phone, Mail, Globe, Star, Info, Clock, Calendar, 
+  Navigation, Heart, Share2, Loader2, ChevronLeft 
 } from 'lucide-react';
-import Globe from '@/components/Globe';
-import SimpleMap from '@/components/SimpleMap';
+import { Button } from '@/components/ui/button';
+import { MasjidApi } from '@/services/api';
 import { toast } from '@/components/ui/use-toast';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { MasjidApi, PrayerTimesApi } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+// Component for prayer time display
+const PrayerTimeCard = ({ name, time }: { name: string, time: string }) => (
+  <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+    <div className="text-masjid-dark dark:text-gray-300 text-sm mb-1">{name}</div>
+    <div className="text-masjid-green font-bold">{time}</div>
+  </div>
+);
+
+// Component for review item
+const ReviewItem = ({ review }: { review: any }) => (
+  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 mb-4">
+    <div className="flex justify-between items-start mb-2">
+      <div className="flex items-center">
+        <div className="w-10 h-10 rounded-full bg-masjid-green/20 text-masjid-green flex items-center justify-center mr-3">
+          {review.user.photoURL ? (
+            <img src={review.user.photoURL} alt={review.user.displayName} className="w-full h-full rounded-full" />
+          ) : (
+            review.user.displayName.charAt(0)
+          )}
+        </div>
+        <div>
+          <div className="font-medium text-masjid-dark dark:text-white">{review.user.displayName}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {new Date(review.createdAt).toLocaleDateString()}
+          </div>
+        </div>
+      </div>
+      <div className="flex">
+        {[...Array(5)].map((_, i) => (
+          <Star 
+            key={i} 
+            className={`h-4 w-4 ${
+              i < review.rating 
+                ? 'text-masjid-gold fill-masjid-gold' 
+                : 'text-gray-300 dark:text-gray-600'
+            }`} 
+          />
+        ))}
+      </div>
+    </div>
+    <p className="text-gray-600 dark:text-gray-300 text-sm">{review.text}</p>
+  </div>
+);
 
 const MasjidDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [activeTab, setActiveTab] = useState('info');
-  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const isMobile = useIsMobile();
   
-  const { data: masjid, isLoading } = useQuery({
+  // Fetch masjid details
+  const { data: masjid, isLoading, isError } = useQuery({
     queryKey: ['masjid', id],
-    queryFn: () => id ? MasjidApi.getById(id) : Promise.reject('No ID provided'),
+    queryFn: () => MasjidApi.getById(id || '1'),
     enabled: !!id,
   });
   
-  const { data: prayerTimes } = useQuery({
-    queryKey: ['prayerTimes', masjid?.location],
-    queryFn: () => {
-      if (!masjid?.location) return Promise.reject('No location available');
-      const lat = masjid.location.coordinates?.[1] || 0;
-      const lng = masjid.location.coordinates?.[0] || 0;
-      return PrayerTimesApi.getForLocation(lat, lng);
-    },
-    enabled: !!masjid?.location,
+  // Fetch reviews
+  const { data: reviews } = useQuery({
+    queryKey: ['reviews', id],
+    queryFn: () => MasjidApi.getReviews(id || '1'),
+    enabled: !!id,
   });
   
-  useEffect(() => {
-    const handleResize = () => {
-      setScreenWidth(window.innerWidth);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-  
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow pt-16 container mx-auto px-4 py-8">
-          <Skeleton className="h-64 w-full mb-4" />
-          <Skeleton className="h-10 w-3/4 mb-2" />
-          <Skeleton className="h-6 w-1/2 mb-8" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <Skeleton className="h-32 w-full mb-4" />
-              <Skeleton className="h-32 w-full" />
-            </div>
-            <div>
-              <Skeleton className="h-64 w-full" />
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-  
-  if (!masjid) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow pt-16 container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-masjid-dark">Masjid Not Found</h1>
-            <p className="mt-4 text-gray-600">The masjid you are looking for could not be found.</p>
-            <Button asChild className="mt-6 bg-masjid-green hover:bg-masjid-green/90">
-              <a href="/find">Find Masjids</a>
-            </Button>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-  
-  const renderStars = (rating: number) => {
-    return Array(5)
-      .fill(0)
-      .map((_, i) => (
-        <Star
-          key={i}
-          className={`h-4 w-4 ${
-            i < Math.floor(rating) 
-              ? 'text-masjid-gold fill-masjid-gold' 
-              : i < rating 
-                ? 'text-masjid-gold fill-masjid-gold/50' 
-                : 'text-gray-300'
-          }`}
-        />
-      ));
-  };
-  
   const toggleFavorite = () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save this masjid to your favorites.",
+      });
+      return;
+    }
+    
     setIsFavorite(!isFavorite);
     toast({
       title: isFavorite ? "Removed from favorites" : "Added to favorites",
-      description: isFavorite ? `${masjid.name} has been removed from your favorites.` : `${masjid.name} has been added to your favorites.`,
+      description: isFavorite 
+        ? `${masjid?.name} has been removed from your favorites` 
+        : `${masjid?.name} has been added to your favorites`,
     });
+    
+    // In a real app, this would call the API
+    if (id) {
+      MasjidApi.toggleSaved(id);
+    }
   };
   
-  const shareMasjid = () => {
-    toast({
-      title: "Share Masjid",
-      description: `Sharing ${masjid.name} information.`,
-    });
-  };
-  
-  const getDirections = () => {
-    toast({
-      title: "Getting Directions",
-      description: `Directions to ${masjid.name} at ${masjid.address}.`,
-    });
+  const shareLocation = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: masjid?.name,
+        text: `Check out ${masjid?.name}`,
+        url: window.location.href,
+      })
+      .then(() => console.log('Successful share'))
+      .catch((error) => console.log('Error sharing', error));
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied",
+        description: "Masjid link copied to clipboard",
+      });
+    }
   };
 
-  const handleDonate = (amount: number) => {
-    toast({
-      title: "Donation Started",
-      description: `Processing your donation of $${amount} to ${masjid.name}.`,
-    });
-    // In a real app, this would redirect to a payment processor
-  };
-  
-  const getResponsiveTabsList = () => {
-    const allTabs = [
-      { value: 'info', label: 'Info', icon: <Info className="h-4 w-4 mr-2" /> },
-      { value: 'prayer-times', label: 'Prayer Times', icon: <Clock className="h-4 w-4 mr-2" /> },
-      { value: 'events', label: 'Events', icon: <Calendar className="h-4 w-4 mr-2" /> },
-      { value: 'community', label: 'Community', icon: <Users className="h-4 w-4 mr-2" /> },
-      { value: 'donate', label: 'Donate', icon: <DollarSign className="h-4 w-4 mr-2" /> },
-      { value: 'photos', label: 'Photos', icon: <Book className="h-4 w-4 mr-2" /> }
-    ];
-    
-    if (screenWidth < 640) {
-      return (
-        <TabsList className="grid w-full grid-cols-6">
-          {allTabs.map(tab => (
-            <TabsTrigger key={tab.value} value={tab.value} className="px-2">
-              {tab.icon}
-              <span className="sr-only">{tab.label}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      );
-    }
-    
-    if (screenWidth < 768) {
-      return (
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="info">
-            <Info className="h-4 w-4 mr-2" />
-            Info
-          </TabsTrigger>
-          <TabsTrigger value="prayer-times">
-            <Clock className="h-4 w-4 mr-2" />
-            Prayer Times
-          </TabsTrigger>
-          <TabsTrigger value="more" onClick={() => {
-            toast({
-              title: "More Options",
-              description: "Select from Events, Community, Donate, or Photos",
-              action: (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {['events', 'community', 'donate', 'photos'].map(tab => (
-                    <Button 
-                      key={tab} 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setActiveTab(tab)}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </Button>
-                  ))}
-                </div>
-              )
-            });
-          }}>
-            <ChevronRight className="h-4 w-4 mr-2" />
-            More
-          </TabsTrigger>
-        </TabsList>
-      );
-    }
-    
+  // Handle loading and error states
+  if (isLoading) {
     return (
-      <TabsList className="grid w-full grid-cols-6">
-        {allTabs.map(tab => (
-          <TabsTrigger key={tab.value} value={tab.value}>
-            {tab.icon}
-            {tab.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-masjid-green" />
+        </div>
+        <Footer />
+      </div>
     );
-  };
+  }
+  
+  if (isError || !masjid) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+        <Navbar />
+        <div className="flex-1 container mx-auto px-4 py-24 text-center">
+          <h1 className="text-2xl font-bold text-red-500 mb-4">Error Loading Masjid</h1>
+          <p className="mb-8 text-gray-600 dark:text-gray-300">Failed to load masjid details. Please try again.</p>
+          <Button asChild>
+            <Link to="/find">Back to Search</Link>
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Navbar />
       
-      <main className="flex-grow pt-16">
-        <div className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden">
-          <img 
-            src={masjid.imageUrl} 
-            alt={masjid.name} 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/70">
-            <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-8">
-              <div className="flex items-center space-x-2 text-white">
-                <div className="flex">{renderStars(masjid.rating)}</div>
-                <span className="text-sm font-medium">{masjid.rating}</span>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mt-2">{masjid.name}</h1>
-              <div className="flex items-center text-white/90 mt-2">
-                <MapPin className="h-4 w-4 mr-1" />
-                <span className="text-sm">{masjid.address}</span>
-              </div>
+      <main className="flex-1 container mx-auto px-4 py-24">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Button variant="ghost" className="pl-0" asChild>
+            <Link to="/find">
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back to Search
+            </Link>
+          </Button>
+        </div>
+        
+        {/* Masjid Header */}
+        <div className="mb-8">
+          <div className="relative">
+            <div className="aspect-[21/9] overflow-hidden rounded-xl">
+              <img 
+                src={masjid.imageUrl} 
+                alt={masjid.name} 
+                className="w-full h-full object-cover"
+              />
             </div>
-          </div>
-        </div>
-        
-        <div className="bg-masjid-green text-white">
-          <div className="container mx-auto px-4 py-3">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-2" />
-                <span className="text-sm">Next: {masjid.nextPrayer?.name || 'Fajr'} {masjid.nextPrayer?.time || prayerTimes?.fajr || '5:30 AM'}</span>
-              </div>
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-2" />
-                <span className="text-sm">Jummah: {masjid.prayerTimes?.jummah || '1:30 PM'}</span>
-              </div>
-              <div className="flex items-center">
-                <Users className="h-4 w-4 mr-2" />
-                <span className="text-sm">{masjid.community?.size || 'Community'}</span>
-              </div>
-              <div className="flex items-center">
-                <Navigation className="h-4 w-4 mr-2" />
-                <span className="text-sm">{masjid.distance} away</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white shadow-md">
-          <div className="container mx-auto px-4 py-4 flex justify-between overflow-x-auto">
-            <Button variant="outline" onClick={getDirections} className="whitespace-nowrap">
-              <Navigation className="h-4 w-4 mr-2" />
-              Directions
-            </Button>
-            <Button variant="outline" onClick={toggleFavorite} className="whitespace-nowrap">
-              <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-              {isFavorite ? 'Favorited' : 'Favorite'}
-            </Button>
-            <Button variant="outline" onClick={shareMasjid} className="whitespace-nowrap">
-              <Share2 className="h-4 w-4 mr-2" />
-              Share
-            </Button>
-          </div>
-        </div>
-        
-        <div className="container mx-auto px-4 py-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            {getResponsiveTabsList()}
             
-            <TabsContent value="info" className="animate-fade-in">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-2 space-y-6">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <h3 className="text-lg font-semibold mb-2">About</h3>
-                      <p className="text-gray-600">{masjid.description}</p>
-                      
-                      {masjid.history && (
-                        <div className="mt-4">
-                          <h4 className="text-base font-medium text-masjid-dark mb-1">History</h4>
-                          <p className="text-gray-600">{masjid.history}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Facilities</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {masjid.facilities.map((facility, index) => (
-                          <Badge key={index} variant="outline" className="bg-green-50 text-masjid-green border-masjid-green/20">
-                            {facility}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Location</h3>
-                      <div className="rounded-xl overflow-hidden h-64">
-                        <SimpleMap />
-                      </div>
-                      <div className="mt-4 flex items-center justify-between">
-                        <span className="text-gray-600">{masjid.address}</span>
-                        <Button variant="outline" onClick={getDirections} size="sm">
-                          <Navigation className="h-4 w-4 mr-2" />
-                          Get Directions
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  {masjid.imams && masjid.imams.length > 0 && (
-                    <Card>
-                      <CardContent className="pt-6">
-                        <h3 className="text-lg font-semibold mb-4">Imams & Staff</h3>
-                        <div className="space-y-4">
-                          {masjid.imams.map((imam, index) => (
-                            <div key={index} className="flex items-start p-3 bg-gray-50 rounded-lg">
-                              <div className="w-12 h-12 bg-masjid-green/20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                <UserCheck className="h-6 w-6 text-masjid-green" />
-                              </div>
-                              <div>
-                                <h4 className="font-medium text-masjid-dark">{imam.name}</h4>
-                                <p className="text-sm text-masjid-green">{imam.role}</p>
-                                <p className="text-sm text-gray-600 mt-1">{imam.bio}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 md:p-6">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{masjid.name}</h1>
+                  <div className="flex items-center text-white mb-2">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    <span className="text-sm md:text-base">{masjid.address}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="flex mr-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`h-4 w-4 ${
+                            i < Math.floor(masjid.rating) 
+                              ? 'text-masjid-gold fill-masjid-gold' 
+                              : 'text-gray-300'
+                          }`} 
+                        />
+                      ))}
+                    </div>
+                    <span className="text-white text-sm">
+                      {masjid.reviewCount} reviews
+                    </span>
+                  </div>
                 </div>
                 
-                <div className="space-y-6">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Contact</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-start">
-                          <Phone className="h-5 w-5 mr-3 text-masjid-green mt-0.5" />
-                          <div>
-                            <p className="font-medium">Phone</p>
-                            <p className="text-gray-600">{masjid.contact.phone}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-start">
-                          <Mail className="h-5 w-5 mr-3 text-masjid-green mt-0.5" />
-                          <div>
-                            <p className="font-medium">Email</p>
-                            <p className="text-gray-600">{masjid.contact.email}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-start">
-                          <Globe className="h-5 w-5 mr-3 text-masjid-green mt-0.5" />
-                          <div>
-                            <p className="font-medium">Website</p>
-                            <p className="text-gray-600">{masjid.contact.website}</p>
-                          </div>
-                        </div>
-                        
-                        {masjid.contact.socialMedia && (
-                          <div className="flex items-center mt-2 gap-3 border-t pt-3">
-                            {Object.entries(masjid.contact.socialMedia).map(([platform, url]) => (
-                              <Button key={platform} variant="ghost" size="sm" className="p-1 h-auto">
-                                <a href={url as string} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-masjid-green">
-                                  {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                                </a>
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Amenities</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {masjid.facilities.includes('Parking') && (
-                          <div className="flex items-center">
-                            <ParkingCircle className="h-5 w-5 mr-2 text-masjid-green" />
-                            <span>Parking Available</span>
-                          </div>
-                        )}
-                        {masjid.facilities.includes('Women Section') && (
-                          <div className="flex items-center">
-                            <Users className="h-5 w-5 mr-2 text-masjid-green" />
-                            <span>Women's Prayer Area</span>
-                          </div>
-                        )}
-                        {masjid.facilities.includes('Free Wifi') && (
-                          <div className="flex items-center">
-                            <Wifi className="h-5 w-5 mr-2 text-masjid-green" />
-                            <span>Free Wifi</span>
-                          </div>
-                        )}
-                        {masjid.facilities.includes('Wheelchair Access') && (
-                          <div className="flex items-center">
-                            <Accessibility className="h-5 w-5 mr-2 text-masjid-green" />
-                            <span>Wheelchair Access</span>
-                          </div>
-                        )}
-                        {masjid.facilities.includes('Library') && (
-                          <div className="flex items-center">
-                            <Book className="h-5 w-5 mr-2 text-masjid-green" />
-                            <span>Library</span>
-                          </div>
-                        )}
-                        {masjid.facilities.includes('Cafeteria') && (
-                          <div className="flex items-center">
-                            <Utensils className="h-5 w-5 mr-2 text-masjid-green" />
-                            <span>Cafeteria</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  {masjid.classes && masjid.classes.length > 0 && (
-                    <Card>
-                      <CardContent className="pt-6">
-                        <h3 className="text-lg font-semibold mb-4">Classes & Education</h3>
-                        <div className="space-y-3">
-                          {masjid.classes.map((cls, index) => (
-                            <div key={index} className="border-b pb-2 last:border-0 last:pb-0">
-                              <div className="flex justify-between">
-                                <p className="font-medium">{cls.name}</p>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-6 p-0">
-                                      <Info className="h-4 w-4 text-masjid-green" />
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent>
-                                    <div>
-                                      <h4 className="font-medium">{cls.name}</h4>
-                                      <p className="text-sm text-gray-600">Instructor: {cls.instructor}</p>
-                                      <p className="text-sm text-gray-600 mt-1">Schedule: {cls.schedule}</p>
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
-                              </div>
-                              <p className="text-sm text-gray-600">{cls.schedule}</p>
-                            </div>
-                          ))}
-                        </div>
-                        <Button variant="link" className="mt-2 text-masjid-green p-0 h-auto">
-                          <School className="h-4 w-4 mr-1" /> View All Educational Programs
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="prayer-times" className="animate-fade-in">
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-xl font-semibold mb-6 text-center">Daily Prayer Times</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {Object.entries(prayerTimes || masjid.prayerTimes || {}).map(([prayer, time]) => {
-                      if (['date', 'location'].includes(prayer)) return null;
-                      
-                      return (
-                        <div key={prayer} className="bg-green-50 rounded-lg p-4 text-center border border-masjid-green/20">
-                          <h4 className="text-masjid-green font-medium capitalize">{prayer}</h4>
-                          <p className="text-lg font-bold mt-1">{time as string}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  <div className="mt-8 bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2 flex items-center">
-                      <Info className="h-4 w-4 mr-2 text-masjid-green" />
-                      Prayer Time Information
-                    </h4>
-                    <ul className="space-y-2 text-sm text-gray-600">
-                      <li className="flex items-start">
-                        <ChevronRight className="h-4 w-4 mr-1 mt-0.5 text-masjid-green flex-shrink-0" />
-                        Prayer times are updated daily based on astronomical calculations for this location.
-                      </li>
-                      <li className="flex items-start">
-                        <ChevronRight className="h-4 w-4 mr-1 mt-0.5 text-masjid-green flex-shrink-0" />
-                        Jumu'ah prayer includes a khutbah (sermon) that starts 15 minutes before the prayer.
-                      </li>
-                      <li className="flex items-start">
-                        <ChevronRight className="h-4 w-4 mr-1 mt-0.5 text-masjid-green flex-shrink-0" />
-                        During Ramadan, additional Taraweeh prayers are held after Isha.
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div className="mt-6 text-center">
-                    <p className="text-gray-500 text-sm">Last updated: Today</p>
-                    <Button variant="outline" className="mt-4">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Download Prayer Timetable
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="events" className="animate-fade-in">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Upcoming Events</h3>
-                  <Button variant="outline" size="sm">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    View Calendar
+                <div className="flex gap-2 mt-4 md:mt-0">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                    onClick={toggleFavorite}
+                  >
+                    <Heart className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                    onClick={shareLocation}
+                  >
+                    <Share2 className="h-5 w-5" />
+                  </Button>
+                  <Button
+                    variant="default"
+                    className="bg-masjid-green hover:bg-masjid-green/90"
+                  >
+                    <Navigation className="h-5 w-5 mr-2" />
+                    <span>Directions</span>
                   </Button>
                 </div>
-                
-                {masjid.events.length > 0 ? (
-                  <div className="space-y-4">
-                    {masjid.events.map((event) => (
-                      <Card key={event.id} className="overflow-hidden transition-all hover:shadow-md">
-                        <CardContent className="p-0">
-                          <div className="flex flex-col md:flex-row">
-                            <div className="bg-masjid-green/10 p-4 md:w-1/4 flex flex-col justify-center items-center">
-                              <Calendar className="h-8 w-8 text-masjid-green" />
-                              <p className="text-masjid-green font-medium mt-2 text-center">{event.date}</p>
-                            </div>
-                            <div className="p-4 md:w-3/4">
-                              <h4 className="text-lg font-semibold">{event.title}</h4>
-                              <p className="text-gray-600 mt-2">{event.description}</p>
-                              <div className="mt-3 flex">
-                                <Button variant="outline" size="sm" className="mr-2">
-                                  Learn More
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  Add to Calendar
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Main Content with Tabs */}
+        <Tabs defaultValue="info" className="w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-8 overflow-hidden">
+            <TabsList className="w-full overflow-x-auto flex-nowrap justify-start bg-gray-100 dark:bg-gray-750 p-0 h-auto rounded-none">
+              <div className="flex w-full min-w-max">  {/* This wrapper prevents tab merging */}
+                <TabsTrigger 
+                  value="info" 
+                  className="flex-1 min-w-[100px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <Info className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Info</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="prayer-times" 
+                  className="flex-1 min-w-[140px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Prayer Times</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="programs" 
+                  className="flex-1 min-w-[120px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Programs</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="reviews" 
+                  className="flex-1 min-w-[120px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Reviews</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="gallery" 
+                  className="flex-1 min-w-[120px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 mr-2"
+                  >
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Gallery</span>
+                </TabsTrigger>
+              </div>
+            </TabsList>
+            
+            {/* Info Tab Content */}
+            <TabsContent value="info" className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-2">
+                  <h2 className="text-xl font-semibold text-masjid-dark dark:text-white mb-4">About {masjid.name}</h2>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6">{masjid.description}</p>
+                  
+                  <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-3">Facilities</h3>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {masjid.facilities.map((facility, index) => (
+                      <span 
+                        key={index}
+                        className="bg-masjid-green/10 text-masjid-green px-3 py-1 rounded-full text-sm"
+                      >
+                        {facility}
+                      </span>
                     ))}
-                    
-                    <div className="text-center mt-6">
-                      <Button variant="default" className="bg-masjid-green hover:bg-masjid-green/90">
-                        View All Events
-                      </Button>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-4">Contact Information</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <MapPin className="h-5 w-5 text-masjid-green mr-3 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-masjid-dark dark:text-white">Address</h4>
+                        <p className="text-gray-600 dark:text-gray-300">{masjid.address}</p>
+                      </div>
                     </div>
+                    
+                    {masjid.phone && (
+                      <div className="flex items-start">
+                        <Phone className="h-5 w-5 text-masjid-green mr-3 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-masjid-dark dark:text-white">Phone</h4>
+                          <p className="text-gray-600 dark:text-gray-300">{masjid.phone}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {masjid.email && (
+                      <div className="flex items-start">
+                        <Mail className="h-5 w-5 text-masjid-green mr-3 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-masjid-dark dark:text-white">Email</h4>
+                          <p className="text-gray-600 dark:text-gray-300">{masjid.email}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {masjid.website && (
+                      <div className="flex items-start">
+                        <Globe className="h-5 w-5 text-masjid-green mr-3 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-masjid-dark dark:text-white">Website</h4>
+                          <a 
+                            href={masjid.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-masjid-green hover:underline"
+                          >
+                            {masjid.website.replace(/^https?:\/\//, '')}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {masjid.socialMedia && (
+                      <div className="flex items-start">
+                        <div className="h-5 w-5 text-masjid-green mr-3 mt-0.5">
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            className="h-5 w-5"
+                          >
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-masjid-dark dark:text-white">Social Media</h4>
+                          <div className="flex gap-3 mt-2">
+                            {masjid.socialMedia.facebook && (
+                              <a 
+                                href={masjid.socialMedia.facebook}
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <svg 
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="2" 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round" 
+                                  className="h-5 w-5"
+                                >
+                                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                                </svg>
+                              </a>
+                            )}
+                            
+                            {masjid.socialMedia.instagram && (
+                              <a 
+                                href={masjid.socialMedia.instagram}
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-pink-600 hover:text-pink-700"
+                              >
+                                <svg 
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="2" 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round" 
+                                  className="h-5 w-5"
+                                >
+                                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                                </svg>
+                              </a>
+                            )}
+                            
+                            {masjid.socialMedia.twitter && (
+                              <a 
+                                href={masjid.socialMedia.twitter}
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-blue-400 hover:text-blue-500"
+                              >
+                                <svg 
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="2" 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round" 
+                                  className="h-5 w-5"
+                                >
+                                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+                                </svg>
+                              </a>
+                            )}
+                            
+                            {masjid.socialMedia.youtube && (
+                              <a 
+                                href={masjid.socialMedia.youtube}
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <svg 
+                                  xmlns="http://www.w3.org/2000/svg" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="2" 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round" 
+                                  className="h-5 w-5"
+                                >
+                                  <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+                                  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+                                </svg>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 mx-auto text-gray-300" />
-                    <p className="mt-4 text-gray-500">No upcoming events at this time</p>
-                  </div>
-                )}
+                </div>
               </div>
             </TabsContent>
             
-            <TabsContent value="community" className="animate-fade-in">
-              {masjid.community ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Community Information</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="font-medium text-masjid-dark">Size</h4>
-                          <p className="text-gray-600">{masjid.community.size}</p>
+            {/* Prayer Times Tab Content */}
+            <TabsContent value="prayer-times" className="p-6">
+              <h2 className="text-xl font-semibold text-masjid-dark dark:text-white mb-6">
+                Prayer Times for {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </h2>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <PrayerTimeCard name="Fajr" time={masjid.prayerTimes.fajr} />
+                <PrayerTimeCard name="Dhuhr" time={masjid.prayerTimes.dhuhr} />
+                <PrayerTimeCard name="Asr" time={masjid.prayerTimes.asr} />
+                <PrayerTimeCard name="Maghrib" time={masjid.prayerTimes.maghrib} />
+                <PrayerTimeCard name="Isha" time={masjid.prayerTimes.isha} />
+                <PrayerTimeCard name="Jummah" time={masjid.prayerTimes.jummah} />
+              </div>
+              
+              <div className="mt-8 p-4 bg-masjid-green/10 dark:bg-masjid-green/5 rounded-lg border border-masjid-green/20 dark:border-masjid-green/10">
+                <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-2">
+                  <Calendar className="h-5 w-5 inline-block mr-2 text-masjid-green" />
+                  Prayer Time Updates
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Prayer times change throughout the year based on the sun's position. 
+                  Always check the latest times before visiting.
+                </p>
+              </div>
+            </TabsContent>
+            
+            {/* Programs Tab Content */}
+            <TabsContent value="programs" className="p-6">
+              <h2 className="text-xl font-semibold text-masjid-dark dark:text-white mb-6">
+                Regular Programs and Events
+              </h2>
+              
+              {masjid.programs && masjid.programs.length > 0 ? (
+                <div className="grid gap-4">
+                  {masjid.programs.map((program, index) => (
+                    <div 
+                      key={index}
+                      className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between"
+                    >
+                      <div>
+                        <h3 className="font-semibold text-masjid-dark dark:text-white mb-1">
+                          {program.name}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">
+                          {program.description}
+                        </p>
+                      </div>
+                      <div className="mt-2 md:mt-0 md:ml-4 flex items-center space-x-4">
+                        <div className="bg-masjid-green/10 px-3 py-1 rounded-full text-masjid-green text-sm">
+                          {program.day}
                         </div>
-                        <div>
-                          <h4 className="font-medium text-masjid-dark">Demographics</h4>
-                          <p className="text-gray-600">{masjid.community.demographics}</p>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-masjid-dark">Languages</h4>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {masjid.community.languages.map((language, index) => (
-                              <Badge key={index} variant="outline" className="flex items-center">
-                                <Languages className="h-3 w-3 mr-1" />
-                                {language}
-                              </Badge>
-                            ))}
-                          </div>
+                        <div className="font-medium text-masjid-dark dark:text-white text-sm">
+                          {program.time}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardContent className="pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Get Involved</h3>
-                      <div className="space-y-3">
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <h4 className="font-medium text-masjid-green">Volunteer Opportunities</h4>
-                          <p className="text-sm text-gray-600 mt-1">Join our team of volunteers to help with events, classes, and general operations.</p>
-                          <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Learn more</Button>
-                        </div>
-                        
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <h4 className="font-medium text-masjid-green">Donation & Charity</h4>
-                          <p className="text-sm text-gray-600 mt-1">Support the masjid and community through donations and zakat contributions.</p>
-                          <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Donate now</Button>
-                        </div>
-                        
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <h4 className="font-medium text-masjid-green">Membership</h4>
-                          <p className="text-sm text-gray-600 mt-1">Become a member to participate in community decisions and receive updates.</p>
-                          <Button variant="link" className="text-masjid-green p-0 mt-1 h-auto text-sm">Join today</Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="md:col-span-2">
-                    <CardContent className="pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Committees & Leadership</h3>
-                      <p className="text-gray-600 mb-4">
-                        The masjid is managed by a board of trustees and various committees that handle different aspects of community operations.
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="border rounded-lg p-4">
-                          <h4 className="font-medium text-masjid-dark">Board of Trustees</h4>
-                          <p className="text-sm text-gray-600 mt-1">Oversees general management and strategic direction.</p>
-                        </div>
-                        <div className="border rounded-lg p-4">
-                          <h4 className="font-medium text-masjid-dark">Education Committee</h4>
-                          <p className="text-sm text-gray-600 mt-1">Manages all educational programs and classes.</p>
-                        </div>
-                        <div className="border rounded-lg p-4">
-                          <h4 className="font-medium text-masjid-dark">Youth Committee</h4>
-                          <p className="text-sm text-gray-600 mt-1">Organizes activities and programs for young Muslims.</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  ))}
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 mx-auto text-gray-300" />
-                  <p className="mt-4 text-gray-500">Community information not available</p>
+                <p className="text-gray-600 dark:text-gray-300">
+                  No regular programs or events available at this time.
+                </p>
+              )}
+              
+              <div className="mt-8 p-4 bg-masjid-green/10 dark:bg-masjid-green/5 rounded-lg border border-masjid-green/20 dark:border-masjid-green/10">
+                <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-2">
+                  <Info className="h-5 w-5 inline-block mr-2 text-masjid-green" />
+                  Special Programs
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  The masjid may host special programs and events during Ramadan, Eid, and other
+                  Islamic holidays. Contact the masjid directly for the most up-to-date information.
+                </p>
+              </div>
+            </TabsContent>
+            
+            {/* Reviews Tab Content */}
+            <TabsContent value="reviews" className="p-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-masjid-dark dark:text-white">
+                  Reviews ({reviews ? reviews.length : 0})
+                </h2>
+                <Button className="mt-4 md:mt-0 bg-masjid-green hover:bg-masjid-green/90">
+                  <Star className="h-4 w-4 mr-2" fill="white" />
+                  Write a Review
+                </Button>
+              </div>
+              
+              {reviews && reviews.length > 0 ? (
+                <div>
+                  {reviews.map((review) => (
+                    <ReviewItem key={review._id} review={review} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <Star className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    This masjid has no reviews yet. Be the first to share your experience!
+                  </p>
                 </div>
               )}
             </TabsContent>
             
-            <TabsContent value="donate" className="animate-fade-in">
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-xl font-semibold mb-6 text-center">Support {masjid.name}</h3>
-                  <p className="text-center text-gray-600 mb-6">
-                    Your generous donations help maintain our masjid and support community programs.
-                    All donations are tax-deductible.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                      <h4 className="text-lg font-medium mb-4 text-masjid-dark">One-Time Donation</h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        {[10, 25, 50, 100, 250, 500].map((amount) => (
-                          <Button 
-                            key={amount} 
-                            variant="outline" 
-                            onClick={() => handleDonate(amount)}
-                            className="border-masjid-green text-masjid-green hover:bg-masjid-green/10 h-16"
-                          >
-                            <DollarSign className="mr-1 h-4 w-4" />
-                            {amount}
-                          </Button>
-                        ))}
-                      </div>
-                      
-                      <div className="mt-6">
-                        <h5 className="font-medium text-sm mb-2">Custom Amount</h5>
-                        <div className="flex">
-                          <div className="relative flex-grow">
-                            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-                            <input 
-                              type="number" 
-                              className="w-full pl-10 py-2 border rounded-l-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
-                              placeholder="Other amount"
-                            />
-                          </div>
-                          <Button 
-                            className="bg-masjid-green hover:bg-masjid-green/90 rounded-l-none"
-                            onClick={() => handleDonate(0)}
-                          >
-                            Donate
-                          </Button>
-                        </div>
-                      </div>
+            {/* Gallery Tab Content */}
+            <TabsContent value="gallery" className="p-6">
+              <h2 className="text-xl font-semibold text-masjid-dark dark:text-white mb-6">
+                Photo Gallery
+              </h2>
+              
+              {masjid.gallery && masjid.gallery.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {masjid.gallery.map((imageUrl, index) => (
+                    <div key={index} className="overflow-hidden rounded-lg aspect-square">
+                      <img 
+                        src={imageUrl} 
+                        alt={`${masjid.name} - ${index + 1}`} 
+                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                      />
                     </div>
-                    
-                    <div>
-                      <h4 className="text-lg font-medium mb-4 text-masjid-dark">Payment Details</h4>
-                      <div className="space-y-4">
-                        <div className="border rounded-lg p-4">
-                          <h5 className="font-medium mb-2">Card Information</h5>
-                          <div className="space-y-3">
-                            <input 
-                              type="text" 
-                              className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
-                              placeholder="Card number"
-                            />
-                            <div className="grid grid-cols-2 gap-3">
-                              <input 
-                                type="text" 
-                                className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
-                                placeholder="MM/YY"
-                              />
-                              <input 
-                                type="text" 
-                                className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
-                                placeholder="CVC"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="border rounded-lg p-4">
-                          <h5 className="font-medium mb-2">Billing Information</h5>
-                          <div className="space-y-3">
-                            <input 
-                              type="text" 
-                              className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
-                              placeholder="Name on card"
-                            />
-                            <input 
-                              type="text" 
-                              className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
-                              placeholder="Email address"
-                            />
-                            <input 
-                              type="text" 
-                              className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-masjid-green" 
-                              placeholder="Billing address"
-                            />
-                          </div>
-                        </div>
-                        
-                        <Button className="w-full bg-masjid-green hover:bg-masjid-green/90 py-6">
-                          Complete Donation
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8 border-t pt-6">
-                    <h4 className="text-lg font-medium mb-4 text-center text-masjid-dark">Where Your Donations Go</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-green-50 p-4 rounded-lg text-center">
-                        <Book className="h-8 w-8 mx-auto text-masjid-green mb-2" />
-                        <h5 className="font-medium text-masjid-green">Educational Programs</h5>
-                        <p className="text-sm text-gray-600 mt-1">Supporting Quran classes and Islamic education.</p>
-                      </div>
-                      <div className="bg-green-50 p-4 rounded-lg text-center">
-                        <Users className="h-8 w-8 mx-auto text-masjid-green mb-2" />
-                        <h5 className="font-medium text-masjid-green">Community Services</h5>
-                        <p className="text-sm text-gray-600 mt-1">Providing resources and aid to community members.</p>
-                      </div>
-                      <div className="bg-green-50 p-4 rounded-lg text-center">
-                        <ParkingCircle className="h-8 w-8 mx-auto text-masjid-green mb-2" />
-                        <h5 className="font-medium text-masjid-green">Facility Maintenance</h5>
-                        <p className="text-sm text-gray-600 mt-1">Keeping our masjid beautiful and functional.</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-600 dark:text-gray-300">
+                  No gallery images available for this masjid.
+                </p>
+              )}
             </TabsContent>
-            
-            <TabsContent value="photos" className="animate-fade-in">
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-xl font-semibold mb-6 text-center">Photo Gallery</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {masjid.gallery.map((photo, index) => (
-                      <div 
-                        key={index} 
-                        className="relative aspect-square rounded-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-[1.02]"
-                      >
-                        <img src={photo} alt={`${masjid.name} - ${index + 1}`} className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-6 text-center">
-                    <Button variant="outline" className="mt-2">
-                      <Book className="h-4 w-4 mr-2" />
-                      View All Photos
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
       </main>
       
       <Footer />

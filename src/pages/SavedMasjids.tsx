@@ -1,142 +1,122 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MasjidCard from '@/components/MasjidCard';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, Heart, List, Grid, Trash2 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MasjidApi, UserApi } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks/use-toast';
+import AuthButton from '@/components/AuthButton';
+import { Loader2, Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { MasjidApi } from '@/services/api';
+import { toast } from '@/components/ui/use-toast';
 
 const SavedMasjids = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-
-  // Fetch saved masjids
-  const { data: savedMasjids = [], isLoading } = useQuery({
+  
+  // Fetch saved masjids using react-query with our API service
+  const { data: savedMasjids, isLoading, isError, refetch } = useQuery({
     queryKey: ['savedMasjids', user?.id],
-    queryFn: () => UserApi.getSavedMasjids(),
-    enabled: !!user,
+    queryFn: () => MasjidApi.getSaved(),
+    enabled: !!user, // Only run query if user is logged in
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Mutation for clearing all saved masjids
-  const clearAllMutation = useMutation({
-    mutationFn: async () => {
-      const promises = savedMasjids.map((masjid: any) => 
-        MasjidApi.toggleSave(masjid._id)
-      );
-      return Promise.all(promises);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['savedMasjids'] });
+  // Handle the case when a user removes a masjid from saved
+  const handleUnsave = async (masjidId: string) => {
+    if (!user) return;
+    
+    try {
+      await MasjidApi.toggleSaved(masjidId);
+      // Optimistically update the UI by refetching saved masjids
+      refetch();
+      
       toast({
-        title: "Success",
-        description: "All saved masjids have been removed",
+        title: "Masjid removed",
+        description: "The masjid has been removed from your saved list.",
       });
-    },
-    onError: (error) => {
+    } catch (error) {
+      console.error("Error removing masjid:", error);
       toast({
         title: "Error",
-        description: "Failed to clear saved masjids",
+        description: "Failed to remove the masjid. Please try again.",
         variant: "destructive",
       });
-    }
-  });
-
-  // Filter masjids by search term
-  const filteredMasjids = searchTerm
-    ? savedMasjids.filter((masjid: any) => 
-        masjid.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        masjid.address.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : savedMasjids;
-
-  const handleClearAll = () => {
-    if (window.confirm('Are you sure you want to remove all saved masjids?')) {
-      clearAllMutation.mutate();
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Navbar />
       
-      <main className="flex-grow pt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-masjid-dark">
-              Your Saved <span className="text-masjid-green">Masjids</span>
-            </h1>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-              Quickly access your favorite mosques and prayer times
+      <main className="flex-1 container mx-auto px-4 py-24">
+        <h1 className="text-3xl md:text-4xl font-bold text-center text-masjid-dark dark:text-white mb-8">
+          Your Saved <span className="text-masjid-green">Masjids</span>
+        </h1>
+        
+        {!user ? (
+          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
+            <Heart className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+            <h2 className="text-2xl font-semibold text-masjid-dark dark:text-white mb-4">
+              Sign in to save your favorite masjids
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
+              Create an account or sign in to save masjids, track prayer times, and receive notifications.
             </p>
-          </div>
-          
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8 animate-fade-in">
-            <div className="relative w-full md:w-auto mb-4 md:mb-0">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <Input 
-                placeholder="Search saved masjids..." 
-                className="pl-10 pr-4 border-masjid-green/20 focus:border-masjid-green focus:ring-masjid-green/20 w-full md:w-80"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className={`border-masjid-green/20 ${viewMode === 'list' ? 'bg-masjid-green/10 text-masjid-green' : 'text-gray-500'}`}
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-5 w-5" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className={`border-masjid-green/20 ${viewMode === 'grid' ? 'bg-masjid-green/10 text-masjid-green' : 'text-gray-500'}`}
-                onClick={() => setViewMode('grid')}
-              >
-                <Grid className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" className="border-masjid-green/20 text-destructive hover:bg-destructive/10" onClick={handleClearAll}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Clear All
-              </Button>
+            <div className="flex justify-center">
+              <AuthButton variant="default" size="lg" fullWidth={false} />
             </div>
           </div>
-          
-          {isLoading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-masjid-green"></div>
-            </div>
-          ) : filteredMasjids.length > 0 ? (
-            <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6 animate-fade-in`}>
-              {filteredMasjids.map((masjid: any) => (
-                <MasjidCard key={masjid._id} {...masjid} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 animate-fade-in">
-              <Heart className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold mb-2 text-masjid-dark">
-                {searchTerm ? 'No matching masjids found' : 'No saved masjids yet'}
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {searchTerm ? 'Try a different search term' : 'Start saving your favorite mosques to access them quickly'}
-              </p>
-              <Button asChild className="bg-masjid-green hover:bg-masjid-green/90">
-                <a href="/find">Find Masjids</a>
-              </Button>
-            </div>
-          )}
-        </div>
+        ) : (
+          <>
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-masjid-green" />
+                <span className="ml-2 text-masjid-dark dark:text-white">Loading your saved masjids...</span>
+              </div>
+            ) : isError ? (
+              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  There was an error loading your saved masjids. Please try again.
+                </p>
+                <Button onClick={() => refetch()}>Retry</Button>
+              </div>
+            ) : savedMasjids && savedMasjids.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {savedMasjids.map((masjid) => (
+                  <MasjidCard 
+                    key={masjid._id} 
+                    id={masjid._id}
+                    name={masjid.name}
+                    address={masjid.address}
+                    distance={masjid.distance}
+                    rating={masjid.rating}
+                    imageUrl={masjid.imageUrl}
+                    description={masjid.description}
+                    facilities={masjid.facilities}
+                    isFavorite={true}
+                    nextPrayer={masjid.nextPrayer}
+                    prayerTimes={masjid.prayerTimes}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
+                <Heart className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                <h2 className="text-xl font-semibold text-masjid-dark dark:text-white mb-4">
+                  You haven't saved any masjids yet
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-8">
+                  Browse masjids and click the heart icon to add them to your saved list.
+                </p>
+                <Button asChild>
+                  <Link to="/find">Find Masjids</Link>
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </main>
       
       <Footer />
