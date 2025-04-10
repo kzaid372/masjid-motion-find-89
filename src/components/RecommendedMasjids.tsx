@@ -11,6 +11,7 @@ const recommendedMasjids = [
     distance: '1.2 km',
     rating: 4.5,
     imageUrl: 'https://images.unsplash.com/photo-1545167496-28be8f7a29e6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+    description: "Al-Noor Mosque serves as a vibrant community center with daily prayers, Quran classes, and regular community events. The mosque welcomes Muslims from all backgrounds.",
     facilities: ['Parking', 'Wudhu Area', 'Women Section'],
     nextPrayer: {
       name: 'Asr',
@@ -32,6 +33,7 @@ const recommendedMasjids = [
     distance: '2.5 km',
     rating: 4.8,
     imageUrl: 'https://images.unsplash.com/photo-1542379653-b926a529191d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+    description: "Masjid Al-Rahman is known for its beautiful architecture and spacious prayer halls. The mosque provides educational programs and social services to the community.",
     facilities: ['Library', 'Prayer Mats', 'AC'],
     nextPrayer: {
       name: 'Asr',
@@ -53,6 +55,7 @@ const recommendedMasjids = [
     distance: '3.0 km',
     rating: 4.2,
     imageUrl: 'https://images.unsplash.com/photo-1609158762357-c6f0c931ace5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+    description: "The Islamic Center combines modern facilities with traditional Islamic values. It offers a wide range of activities including youth programs and interfaith dialogues.",
     facilities: ['Quran Classes', 'Cafe', 'Wheelchair Access'],
     nextPrayer: {
       name: 'Asr',
@@ -71,13 +74,13 @@ const recommendedMasjids = [
 
 const RecommendedMasjids = () => {
   return (
-    <section className="py-16 bg-gray-50 pattern-bg">
+    <section className="py-16 bg-gray-50 pattern-bg dark:bg-gray-900/50 dark:text-gray-100 transition-colors duration-300">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-masjid-dark mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-masjid-dark dark:text-gray-100 mb-4">
             Recommended <span className="text-masjid-green">Masjids</span>
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Discover top-rated mosques near you with excellent facilities and services
           </p>
         </div>

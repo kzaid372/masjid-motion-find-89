@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 type Theme = 'light' | 'dark';
@@ -25,6 +24,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   useEffect(() => {
+    // Apply transition classes to all relevant elements
+    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+    
     // Update the HTML document class when theme changes
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -35,17 +37,31 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Save theme preference to localStorage
     localStorage.setItem('theme', theme);
 
-    // Adding a small delay to allow animations to complete smoothly
+    // Add consistent transition to various elements for smoother theme switching
+    const elements = document.querySelectorAll('button, a, div, section, card, span, p, h1, h2, h3, h4, h5, h6');
+    elements.forEach(el => {
+      if (el instanceof HTMLElement) {
+        el.style.transition = 'background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease';
+      }
+    });
+
+    // Reset transition after theme change is complete
     const timer = setTimeout(() => {
+      // Keep transition for hover effects but remove it for the initial theme change
       document.body.style.transition = '';
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [theme]);
 
   const toggleTheme = () => {
-    // Add transition for smooth theme change
-    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+    // Add custom transition for specific elements that need it
+    document.querySelectorAll('.card, .pattern-bg, .islamic-pattern').forEach(el => {
+      if (el instanceof HTMLElement) {
+        el.style.transition = 'background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease';
+      }
+    });
+    
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
