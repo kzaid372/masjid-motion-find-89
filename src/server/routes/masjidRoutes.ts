@@ -1,5 +1,5 @@
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { ObjectId } from 'mongodb';
 import { getDb } from '../config/db';
 import { verifyAuth } from '../middleware/auth';
@@ -111,10 +111,10 @@ router.post('/save/:id', verifyAuth, async (req: Request, res: Response) => {
       { $addToSet: { savedMasjids: new ObjectId(id) } }
     );
     
-    return res.json({ success: true });
+    res.json({ success: true });
   } catch (error) {
     console.error('Error saving masjid:', error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -128,13 +128,13 @@ router.delete('/save/:id', verifyAuth, async (req: Request, res: Response) => {
     // Remove masjid from user's saved list
     await db.collection('users').updateOne(
       { _id: new ObjectId(userId as string) },
-      { $pull: { savedMasjids: new ObjectId(id) } }
+      { $pull: { savedMasjids: new ObjectId(id as string) } }
     );
     
-    return res.json({ success: true });
+    res.json({ success: true });
   } catch (error) {
     console.error('Error removing saved masjid:', error);
-    return res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
