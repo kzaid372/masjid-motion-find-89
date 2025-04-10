@@ -2,8 +2,13 @@
 import React from 'react';
 import { MapPin } from 'lucide-react';
 
+interface SimpleMapProps {
+  masjids?: any[];
+  userLocation?: { lat: number; lng: number } | null;
+}
+
 // In a real application, this would be an actual map using Google Maps, Mapbox, etc.
-const SimpleMap = () => {
+const SimpleMap = ({ masjids = [], userLocation }: SimpleMapProps) => {
   return (
     <div className="relative w-full h-[70vh] bg-gray-100 rounded-xl overflow-hidden shadow-md">
       <div className="absolute inset-0 flex items-center justify-center">
@@ -12,6 +17,11 @@ const SimpleMap = () => {
           <p className="mt-4 text-gray-600">
             Map component would be integrated here with a real mapping API like Google Maps or Mapbox.
           </p>
+          {userLocation && (
+            <p className="mt-2 text-sm text-masjid-green">
+              Your location: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+            </p>
+          )}
         </div>
       </div>
       
