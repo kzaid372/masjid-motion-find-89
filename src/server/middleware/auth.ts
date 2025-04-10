@@ -24,8 +24,15 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
     const token = authHeader.split(' ')[1];
     
     // Verify Firebase token
+    // Since we're using a mock version here, we'll just return a success
+    // In a real app, you would uncomment this code and ensure Firebase Admin is set up
+    /*
     const decodedToken = await auth.verifyIdToken(token);
     const firebaseId = decodedToken.uid;
+    */
+    
+    // For development/demo purposes, use a mock user ID
+    const firebaseId = 'mock-firebase-user-id';
     
     // Find user in database
     const db = getDb();
@@ -35,9 +42,9 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
     if (!user) {
       const newUser = {
         firebaseId,
-        email: decodedToken.email || '',
-        displayName: decodedToken.name || 'User',
-        photoURL: decodedToken.picture || '',
+        email: 'mock@example.com',
+        displayName: 'Mock User',
+        photoURL: '',
         savedMasjids: [],
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -57,12 +57,14 @@ const PrayerTimes = () => {
     queryKey: ['prayerTimes', coordinates?.lat, coordinates?.lng],
     queryFn: () => coordinates ? PrayerTimesApi.getForLocation(coordinates.lat, coordinates.lng) : Promise.resolve(null),
     enabled: !!coordinates,
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to fetch prayer times. Please try again.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to fetch prayer times. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   });
   

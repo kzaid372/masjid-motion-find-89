@@ -1,8 +1,7 @@
-
 import express from 'express';
 import { ObjectId } from 'mongodb';
 import { getDb } from '../config/db';
-import { Masjid } from '../models/types';
+import { Masjid, User } from '../models/types';
 import { verifyAuth } from '../middleware/auth';
 
 const router = express.Router();
@@ -130,14 +129,14 @@ router.post('/save', verifyAuth, async (req, res) => {
         { _id: new ObjectId(userId) },
         { $pull: { savedMasjids: new ObjectId(masjidId) } }
       );
-      res.json({ saved: false });
+      return res.json({ saved: false });
     } else {
       // Masjid is not saved, add it
       await db.collection('users').updateOne(
         { _id: new ObjectId(userId) },
         { $addToSet: { savedMasjids: new ObjectId(masjidId) } }
       );
-      res.json({ saved: true });
+      return res.json({ saved: true });
     }
   } catch (error) {
     console.error('Error toggling saved masjid:', error);
@@ -162,10 +161,10 @@ router.get('/saved', verifyAuth, async (req, res) => {
     
     // Get masjid details
     const savedMasjids = await db.collection<Masjid>('masjids').find({
-      _id: { $in: user.savedMasjids },
+      _id: { $in: user.savedMasjids as ObjectId[] },
     }).toArray();
     
-    res.json(savedMasjids);
+    return res.json(savedMasjids);
   } catch (error) {
     console.error('Error getting saved masjids:', error);
     res.status(500).json({ message: 'Server error' });

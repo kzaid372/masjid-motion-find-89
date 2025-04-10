@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
       }
     };
     
-    res.json(prayerTimes);
+    return res.json(prayerTimes);
   } catch (error) {
     console.error('Error getting prayer times:', error);
     res.status(500).json({ message: 'Server error' });
