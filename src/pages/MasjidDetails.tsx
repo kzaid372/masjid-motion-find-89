@@ -149,34 +149,6 @@ const MasjidDetails = () => {
     );
   }
 
-  // Define tab items to make them easier to manage
-  const tabItems = [
-    { value: "info", icon: <Info className="h-4 w-4 mr-2" />, label: "Info" },
-    { value: "prayer-times", icon: <Clock className="h-4 w-4 mr-2" />, label: "Prayer Times" },
-    { value: "programs", icon: <Calendar className="h-4 w-4 mr-2" />, label: "Programs" },
-    { value: "reviews", icon: <Star className="h-4 w-4 mr-2" />, label: "Reviews" },
-    { 
-      value: "gallery", 
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-4 w-4 mr-2"
-        >
-          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-          <circle cx="9" cy="9" r="2" />
-          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-        </svg>
-      ), 
-      label: "Gallery" 
-    }
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Navbar />
@@ -263,25 +235,58 @@ const MasjidDetails = () => {
         {/* Main Content with Tabs */}
         <Tabs defaultValue="info" className="w-full">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-8 overflow-hidden">
-            {/* Redesigned TabsList for better responsiveness */}
-            <div className="w-full overflow-x-auto scrollbar-hide bg-gray-100 dark:bg-gray-750">
-              <TabsList className="w-full min-w-max bg-gray-100 dark:bg-gray-750 p-0 h-auto rounded-none">
-                {tabItems.map((tab) => (
-                  <TabsTrigger
-                    key={tab.value}
-                    value={tab.value}
-                    className={`
-                      flex-1 min-w-[100px] py-4 rounded-none border-b-2 border-transparent 
-                      data-[state=active]:border-masjid-green data-[state=active]:bg-white 
-                      dark:data-[state=active]:bg-gray-800 whitespace-nowrap
-                    `}
+            <TabsList className="w-full overflow-x-auto flex-nowrap justify-start bg-gray-100 dark:bg-gray-750 p-0 h-auto rounded-none">
+              <div className="flex w-full min-w-max">  {/* This wrapper prevents tab merging */}
+                <TabsTrigger 
+                  value="info" 
+                  className="flex-1 min-w-[100px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <Info className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Info</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="prayer-times" 
+                  className="flex-1 min-w-[140px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Prayer Times</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="programs" 
+                  className="flex-1 min-w-[120px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Programs</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="reviews" 
+                  className="flex-1 min-w-[120px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Reviews</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="gallery" 
+                  className="flex-1 min-w-[120px] py-4 rounded-none border-b-2 border-transparent data-[state=active]:border-masjid-green data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 mr-2"
                   >
-                    {tab.icon}
-                    <span className={isMobile ? "text-xs" : "text-sm"}>{tab.label}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
+                  <span className={isMobile ? "text-xs" : "text-sm"}>Gallery</span>
+                </TabsTrigger>
+              </div>
+            </TabsList>
             
             {/* Info Tab Content */}
             <TabsContent value="info" className="p-6">
