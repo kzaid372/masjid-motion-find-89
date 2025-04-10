@@ -128,7 +128,7 @@ router.delete('/save/:id', verifyAuth, async (req: Request, res: Response) => {
     // Remove masjid from user's saved list
     await db.collection('users').updateOne(
       { _id: new ObjectId(userId as string) },
-      { $pull: { savedMasjids: new ObjectId(id as string) } }
+      { $pull: { savedMasjids: new ObjectId(id) } }
     );
     
     res.json({ success: true });
