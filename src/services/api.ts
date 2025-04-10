@@ -128,53 +128,40 @@ export const MasjidApi = {
   }
 };
 
-// Add PrayerTimesApi to handle prayer times requests
+// Prayer Times API with fallback to dummy data
 export const PrayerTimesApi = {
-  // Get prayer times by location coordinates
   getByLocation: async (lat: number, lng: number) => {
     try {
-      const response = await api.get(`/prayer-times?lat=${lat}&lng=${lng}`);
+      const response = await api.get(`/prayer-times/location?lat=${lat}&lng=${lng}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching prayer times:', error);
-      // Return dummy prayer times data as fallback
+      // Return dummy prayer times
       return {
-        date: new Date().toISOString().split('T')[0],
-        fajr: '5:12 AM',
-        sunrise: '6:28 AM',
-        dhuhr: '1:05 PM',
-        asr: '4:35 PM',
-        maghrib: '7:42 PM',
-        isha: '9:12 PM',
-        location: {
-          latitude: lat,
-          longitude: lng,
-        }
+        fajr: '5:30 AM',
+        dhuhr: '1:15 PM',
+        asr: '4:45 PM',
+        maghrib: '7:30 PM',
+        isha: '9:00 PM',
+        date: new Date().toISOString()
       };
     }
   },
   
-  // Get prayer times by city name
-  getByCity: async (city: string, country: string = '') => {
+  getByCity: async (city: string, country: string) => {
     try {
-      const query = country ? `${city}, ${country}` : city;
-      const response = await api.get(`/prayer-times/by-city?city=${encodeURIComponent(query)}`);
+      const response = await api.get(`/prayer-times/city?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching prayer times by city:', error);
-      // Return dummy prayer times data as fallback
+      console.error('Error fetching prayer times for city:', error);
+      // Return dummy prayer times
       return {
-        date: new Date().toISOString().split('T')[0],
-        fajr: '5:12 AM',
-        sunrise: '6:28 AM',
-        dhuhr: '1:05 PM',
-        asr: '4:35 PM',
-        maghrib: '7:42 PM',
-        isha: '9:12 PM',
-        location: {
-          city: city,
-          country: country || 'Unknown',
-        }
+        fajr: '5:30 AM',
+        dhuhr: '1:15 PM',
+        asr: '4:45 PM',
+        maghrib: '7:30 PM',
+        isha: '9:00 PM',
+        date: new Date().toISOString()
       };
     }
   }
