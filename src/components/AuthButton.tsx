@@ -51,14 +51,19 @@ const AuthButton: React.FC<AuthButtonProps> = ({
     );
   }
 
+  // We need to handle potential null values from Firebase
+  const displayName = user.displayName || 'User';
+  const userInitial = displayName ? displayName.charAt(0) : 'U';
+  const email = user.email || 'No email provided';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className={className}>
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.photoURL} alt={user.displayName} />
+            <AvatarImage src={user.photoURL || undefined} alt={displayName} />
             <AvatarFallback className="bg-masjid-green text-white">
-              {user.displayName.charAt(0)}
+              {userInitial}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -68,10 +73,10 @@ const AuthButton: React.FC<AuthButtonProps> = ({
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex items-center">
           <User className="mr-2 h-4 w-4" />
-          <span>{user.displayName}</span>
+          <span>{displayName}</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex items-center text-xs text-muted-foreground">
-          <span>{user.email}</span>
+          <span>{email}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex items-center text-destructive focus:text-destructive" onClick={signOut}>

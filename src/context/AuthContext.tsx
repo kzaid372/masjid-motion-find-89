@@ -1,12 +1,19 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { 
+  signInWithPopup, 
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { auth, googleProvider } from '@/config/firebase';
 
 interface User {
   id: string;
-  email: string;
-  displayName: string;
-  photoURL?: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL?: string | null;
 }
 
 interface AuthContextType {
@@ -30,31 +37,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is already logged in
+  // Convert Firebase user to our User interface
+  const formatUser = (firebaseUser: FirebaseUser): User => ({
+    id: firebaseUser.uid,
+    email: firebaseUser.email,
+    displayName: firebaseUser.displayName || 'User',
+    photoURL: firebaseUser.photoURL,
+  });
+
+  // Listen for auth state changes
   useEffect(() => {
-    const storedUser = localStorage.getItem('masjidFinder_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(formatUser(firebaseUser));
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
-  // Mock Google sign in function (would use real Firebase/Auth in production)
+  // Real Google sign in function using Firebase
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      
-      // This is a mock implementation - in a real app, you would use Firebase Auth or similar
-      const mockUser = {
-        id: 'google-user-123',
-        email: 'user@example.com',
-        displayName: 'Demo User',
-        photoURL: 'https://ui-avatars.com/api/?name=Demo+User&background=0C6E4E&color=fff',
-      };
-      
-      // Store user in localStorage (in a real app, you'd use proper auth tokens)
-      localStorage.setItem('masjidFinder_user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      await signInWithPopup(auth, googleProvider);
       
       toast({
         title: "Success!",
@@ -75,10 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
-      
-      // Remove user from localStorage
-      localStorage.removeItem('masjidFinder_user');
-      setUser(null);
+      await firebaseSignOut(auth);
       
       toast({
         title: "Signed out",
