@@ -13,7 +13,7 @@ import { PrayerTimesApi, MasjidApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 
 const PrayerTimes = () => {
-  const [location, setLocation] = useState<string>('');
+  const [location, setLocation] = useState<string>('New York, NY'); // Default to prevent empty value
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
   const { theme, toggleTheme } = useTheme();
   
@@ -33,7 +33,7 @@ const PrayerTimes = () => {
             .then(data => {
               const city = data.address.city || data.address.town || data.address.village || 'Unknown';
               const state = data.address.state || '';
-              setLocation(`${city}, ${state}`);
+              setLocation(`${city}, ${state}` || 'New York, NY'); // Ensure it's never empty
             })
             .catch(err => {
               console.error('Error getting location name:', err);
@@ -141,7 +141,8 @@ const PrayerTimes = () => {
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={location}>{location}</SelectItem>
+                    {/* Key fix: Ensure location is never an empty string */}
+                    <SelectItem value={location || "New York, NY"}>{location || "New York, NY"}</SelectItem>
                     <SelectItem value="New York, NY">New York, NY</SelectItem>
                     <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
                     <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
