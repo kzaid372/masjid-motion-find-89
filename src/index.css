@@ -229,6 +229,60 @@
   .shimmer {
     @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent;
   }
+
+  /* Mobile-first responsive design */
+  .container-fluid {
+    @apply w-full px-4 sm:px-6 md:px-8;
+  }
+  
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+  }
+  
+  /* Modern card design */
+  .modern-card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700;
+  }
+  
+  /* Animated button with hover effect */
+  .animated-btn {
+    @apply relative overflow-hidden bg-masjid-green text-white px-6 py-3 rounded-lg transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300;
+  }
+  
+  .animated-btn::before {
+    @apply content-[''] absolute top-0 left-0 w-full h-full bg-white/20 transform -translate-x-full skew-x-12;
+    transition: transform 0.6s ease-out;
+  }
+  
+  .animated-btn:hover::before {
+    @apply transform translate-x-full;
+  }
+  
+  /* Pill badge with animated background */
+  .animated-badge {
+    @apply px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-masjid-green to-masjid-blue text-white animate-pulse-gentle;
+  }
+  
+  /* Bottom navigation for mobile */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 flex justify-around items-center py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50 md:hidden;
+  }
+  
+  /* Custom scrollbar */
+  .custom-scrollbar {
+    @apply scrollbar-thin scrollbar-thumb-masjid-green/60 scrollbar-track-gray-100 dark:scrollbar-thumb-masjid-green/40 dark:scrollbar-track-gray-800;
+  }
+  
+  /* Bouncing animation for CTA elements */
+  .bounce-animation {
+    animation: bounce 2s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+  }
 }
 
 /* Extended animations */
@@ -262,4 +316,60 @@
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Media queries for improved mobile responsiveness */
+@media (max-width: 640px) {
+  .mobile-p-adjust {
+    @apply px-4 py-3;
+  }
+  
+  .mobile-text-adjust {
+    @apply text-sm;
+  }
+  
+  .mobile-full-width {
+    @apply w-full !important;
+  }
+  
+  .hide-on-mobile {
+    @apply hidden;
+  }
+}
+
+/* Enhanced loading animations */
+.loading-skeleton {
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+}
+
+/* 3D button effect */
+.btn-3d {
+  @apply bg-masjid-green text-white font-medium py-3 px-6 rounded-lg shadow-md transform transition-all duration-200;
+  box-shadow: 0 4px 0 darken(#0C6E4E, 10%);
+}
+
+.btn-3d:hover {
+  @apply transform -translate-y-1;
+  box-shadow: 0 5px 0 darken(#0C6E4E, 10%);
+}
+
+.btn-3d:active {
+  @apply transform translate-y-0;
+  box-shadow: 0 2px 0 darken(#0C6E4E, 10%);
+}
+
+/* Glassmorphism card effect */
+.glass-card {
+  @apply bg-white/60 dark:bg-gray-800/60 backdrop-blur-md rounded-xl border border-white/20 dark:border-gray-700/20 shadow-lg;
 }

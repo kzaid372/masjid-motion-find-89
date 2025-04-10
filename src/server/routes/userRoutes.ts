@@ -28,7 +28,7 @@ router.put('/profile', verifyAuth, async (req, res) => {
     return res.json({ success: true });
   } catch (error) {
     console.error('Error updating user profile:', error);
-    res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -55,7 +55,7 @@ router.get('/saved-masjids', verifyAuth, async (req, res) => {
     return res.json(savedMasjids);
   } catch (error) {
     console.error('Error getting saved masjids:', error);
-    res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 
