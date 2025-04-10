@@ -1,5 +1,5 @@
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { ObjectId } from 'mongodb';
 import { getDb } from '../config/db';
 import { verifyAuth } from '../middleware/auth';
@@ -8,7 +8,7 @@ import { Masjid } from '../models/types';
 const router = express.Router();
 
 // Get all masjids
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const db = getDb();
     const masjids = await db.collection('masjids').find({}).toArray();
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get nearby masjids
-router.get('/nearby', async (req, res) => {
+router.get('/nearby', async (req: Request, res: Response) => {
   try {
     const { lat, lng, limit = '10', distance = '10' } = req.query;
     
@@ -37,8 +37,12 @@ router.get('/nearby', async (req, res) => {
     
     // Calculate distance (very basic approximation)
     const nearbyMasjids = masjids.map(masjid => {
-      const latDiff = parseFloat(lat as string) - (masjid.location?.lat || 0);
-      const lngDiff = parseFloat(lng as string) - (masjid.location?.lng || 0);
+      // Get coordinates from the location object
+      const masjidLat = masjid.location ? masjid.location.coordinates[1] : 0;
+      const masjidLng = masjid.location ? masjid.location.coordinates[0] : 0;
+      
+      const latDiff = parseFloat(lat as string) - masjidLat;
+      const lngDiff = parseFloat(lng as string) - masjidLng;
       const d = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
       const kmDistance = d * 111; // Rough conversion to km
       
@@ -69,7 +73,7 @@ router.get('/nearby', async (req, res) => {
 });
 
 // Get a single masjid by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const db = getDb();
@@ -88,7 +92,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Save a masjid to user's saved list (requires authentication)
-router.post('/save/:id', verifyAuth, async (req, res) => {
+router.post('/save/:id', verifyAuth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { userId } = req; // From verifyAuth middleware
@@ -103,7 +107,7 @@ router.post('/save/:id', verifyAuth, async (req, res) => {
     
     // Add masjid to user's saved list
     await db.collection('users').updateOne(
-      { _id: new ObjectId(userId) },
+      { _id: new ObjectId(userId as string) },
       { $addToSet: { savedMasjids: new ObjectId(id) } }
     );
     
@@ -115,7 +119,7 @@ router.post('/save/:id', verifyAuth, async (req, res) => {
 });
 
 // Remove a masjid from user's saved list (requires authentication)
-router.delete('/save/:id', verifyAuth, async (req, res) => {
+router.delete('/save/:id', verifyAuth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { userId } = req; // From verifyAuth middleware
@@ -123,7 +127,7 @@ router.delete('/save/:id', verifyAuth, async (req, res) => {
     
     // Remove masjid from user's saved list
     await db.collection('users').updateOne(
-      { _id: new ObjectId(userId) },
+      { _id: new ObjectId(userId as string) },
       { $pull: { savedMasjids: new ObjectId(id) } }
     );
     

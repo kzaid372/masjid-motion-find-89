@@ -1,5 +1,5 @@
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { getDb } from '../config/db';
 import { verifyAuth } from '../middleware/auth';
@@ -8,14 +8,14 @@ import { Masjid, User } from '../models/types';
 const router = express.Router();
 
 // Update user profile (requires authentication)
-router.put('/profile', verifyAuth, async (req, res) => {
+router.put('/profile', verifyAuth, async (req: Request, res: Response) => {
   try {
     const { userId } = req; // From verifyAuth middleware
     const { displayName, photoURL } = req.body;
     const db = getDb();
     
     await db.collection<User>('users').updateOne(
-      { _id: new ObjectId(userId) },
+      { _id: new ObjectId(userId as string) },
       { 
         $set: { 
           displayName,
@@ -33,14 +33,14 @@ router.put('/profile', verifyAuth, async (req, res) => {
 });
 
 // Get user's saved masjids (requires authentication)
-router.get('/saved-masjids', verifyAuth, async (req, res) => {
+router.get('/saved-masjids', verifyAuth, async (req: Request, res: Response) => {
   try {
     const { userId } = req; // From verifyAuth middleware
     const db = getDb();
     
     // Get user with saved masjids
     const user = await db.collection<User>('users').findOne({
-      _id: new ObjectId(userId),
+      _id: new ObjectId(userId as string),
     });
     
     if (!user || !user.savedMasjids || user.savedMasjids.length === 0) {
