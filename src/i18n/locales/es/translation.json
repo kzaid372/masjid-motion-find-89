@@ -1,0 +1,86 @@
+
+{
+  "navbar": {
+    "home": "Inicio",
+    "findMasjid": "Encontrar Mezquita",
+    "prayerTimes": "Horarios de Oración",
+    "favorites": "Favoritos",
+    "settings": "Configuración"
+  },
+  "hero": {
+    "title": "Encuentra tu Mezquita más Cercana",
+    "subtitle": "Localiza fácilmente mezquitas cercanas, verifica horarios de oración y obtén indicaciones con nuestra moderna aplicación de búsqueda de mezquitas.",
+    "findNearestMasjid": "Encontrar Mezquita Cercana",
+    "checkPrayerTimes": "Ver Horarios de Oración",
+    "trustedBy": "Confiado por",
+    "masjids": "Mezquitas",
+    "nextPrayer": "Próxima Oración",
+    "viewTimes": "Ver Horarios",
+    "newFeatures": "Nuevas Funciones"
+  },
+  "findMasjid": {
+    "title": "Encuentra Mezquitas Cercanas",
+    "subtitle": "Busca mezquitas en tu área, verifica horarios de oración y obtén indicaciones",
+    "findNearby": "Buscar Cercanas",
+    "finding": "Buscando...",
+    "mapView": "Vista de Mapa",
+    "listView": "Vista de Lista",
+    "noMasjidsFound": "No se encontraron mezquitas en esta área.",
+    "loadingMasjids": "Cargando mezquitas...",
+    "retrySearch": "Reintentar Búsqueda",
+    "resetFilters": "Restablecer Filtros",
+    "mosques": "Mezquitas Cercanas"
+  },
+  "filters": {
+    "showingMasjids": "Mostrando mezquitas dentro de {{distance}}km",
+    "prayer": "oración",
+    "currentlyOpen": "actualmente abierto",
+    "clear": "Limpiar"
+  },
+  "savedMasjids": {
+    "title": "Tus Mezquitas Guardadas",
+    "signInToSave": "Inicia sesión para guardar tus mezquitas favoritas",
+    "createAccount": "Crea una cuenta o inicia sesión para guardar mezquitas, seguir horarios de oración y recibir notificaciones.",
+    "loading": "Cargando tus mezquitas guardadas...",
+    "error": "Hubo un error al cargar tus mezquitas guardadas. Por favor, inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "noSavedMasjids": "Aún no has guardado ninguna mezquita",
+    "browseMasjids": "Explora mezquitas y haz clic en el ícono de corazón para añadirlas a tu lista de guardados.",
+    "findMasjids": "Encontrar Mezquitas"
+  },
+  "prayerTimes": {
+    "title": "Horarios de Oración",
+    "subtitle": "Consulta horarios precisos de oración para tu ubicación o cualquier ciudad del mundo",
+    "yourLocation": "Tu Ubicación",
+    "searchCity": "Buscar Ciudad",
+    "findTimes": "Buscar Horarios",
+    "loading": "Cargando horarios de oración...",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "fajr": "Fajr",
+    "sunrise": "Amanecer",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha"
+  },
+  "donation": {
+    "title": "Apoya Nuestra Mezquita",
+    "subtitle": "Tu generosidad nos ayuda a mantener nuestras instalaciones y servir a la comunidad"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "¡Ups! Página no encontrada",
+    "returnHome": "Volver a Inicio"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "submit": "Enviar"
+  }
+}

@@ -1,0 +1,86 @@
+
+{
+  "navbar": {
+    "home": "Accueil",
+    "findMasjid": "Trouver une Mosquée",
+    "prayerTimes": "Heures de Prière",
+    "favorites": "Favoris",
+    "settings": "Paramètres"
+  },
+  "hero": {
+    "title": "Trouvez la Mosquée la Plus Proche",
+    "subtitle": "Localisez facilement les mosquées près de chez vous, vérifiez les heures de prière et obtenez des directions avec notre application moderne de recherche de mosquées.",
+    "findNearestMasjid": "Trouver la Mosquée la Plus Proche",
+    "checkPrayerTimes": "Vérifier les Heures de Prière",
+    "trustedBy": "Approuvé par",
+    "masjids": "Mosquées",
+    "nextPrayer": "Prochaine Prière",
+    "viewTimes": "Voir les Horaires",
+    "newFeatures": "Nouvelles Fonctionnalités"
+  },
+  "findMasjid": {
+    "title": "Trouvez des Mosquées Près de Chez Vous",
+    "subtitle": "Recherchez des mosquées dans votre région, vérifiez les heures de prière et obtenez des directions",
+    "findNearby": "Chercher à Proximité",
+    "finding": "Recherche en cours...",
+    "mapView": "Vue Carte",
+    "listView": "Vue Liste",
+    "noMasjidsFound": "Aucune mosquée trouvée dans cette zone.",
+    "loadingMasjids": "Chargement des mosquées...",
+    "retrySearch": "Réessayer la Recherche",
+    "resetFilters": "Réinitialiser les Filtres",
+    "mosques": "Mosquées à Proximité"
+  },
+  "filters": {
+    "showingMasjids": "Affichage des mosquées dans un rayon de {{distance}}km",
+    "prayer": "prière",
+    "currentlyOpen": "actuellement ouvert",
+    "clear": "Effacer"
+  },
+  "savedMasjids": {
+    "title": "Vos Mosquées Enregistrées",
+    "signInToSave": "Connectez-vous pour enregistrer vos mosquées préférées",
+    "createAccount": "Créez un compte ou connectez-vous pour enregistrer des mosquées, suivre les heures de prière et recevoir des notifications.",
+    "loading": "Chargement de vos mosquées enregistrées...",
+    "error": "Une erreur est survenue lors du chargement de vos mosquées enregistrées. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "noSavedMasjids": "Vous n'avez pas encore enregistré de mosquées",
+    "browseMasjids": "Parcourez les mosquées et cliquez sur l'icône en forme de cœur pour les ajouter à votre liste d'enregistrements.",
+    "findMasjids": "Trouver des Mosquées"
+  },
+  "prayerTimes": {
+    "title": "Heures de Prière",
+    "subtitle": "Vérifiez les heures de prière précises pour votre emplacement ou n'importe quelle ville du monde",
+    "yourLocation": "Votre Emplacement",
+    "searchCity": "Rechercher une Ville",
+    "findTimes": "Trouver les Horaires",
+    "loading": "Chargement des heures de prière...",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "fajr": "Fajr",
+    "sunrise": "Lever du soleil",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha"
+  },
+  "donation": {
+    "title": "Soutenez Notre Mosquée",
+    "subtitle": "Votre générosité nous aide à maintenir nos installations et à servir la communauté"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Oups ! Page non trouvée",
+    "returnHome": "Retour à l'Accueil"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "submit": "Soumettre"
+  }
+}

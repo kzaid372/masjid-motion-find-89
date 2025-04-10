@@ -1,0 +1,86 @@
+
+{
+  "navbar": {
+    "home": "Home",
+    "findMasjid": "Find Masjid",
+    "prayerTimes": "Prayer Times",
+    "favorites": "Favorites",
+    "settings": "Settings"
+  },
+  "hero": {
+    "title": "Find Your Nearest Masjid",
+    "subtitle": "Easily locate mosques near you, check prayer times, and get directions with our modern mosque finder app.",
+    "findNearestMasjid": "Find Nearest Masjid",
+    "checkPrayerTimes": "Check Prayer Times",
+    "trustedBy": "Trusted by",
+    "masjids": "Masjids",
+    "nextPrayer": "Next Prayer",
+    "viewTimes": "View Times",
+    "newFeatures": "New Features"
+  },
+  "findMasjid": {
+    "title": "Find Masjids Near You",
+    "subtitle": "Search for mosques in your area, check prayer times, and get directions",
+    "findNearby": "Find Nearby",
+    "finding": "Finding...",
+    "mapView": "Map View",
+    "listView": "List View",
+    "noMasjidsFound": "No masjids found in this area.",
+    "loadingMasjids": "Loading masjids...",
+    "retrySearch": "Retry Search",
+    "resetFilters": "Reset Filters",
+    "mosques": "Mosques Near You"
+  },
+  "filters": {
+    "showingMasjids": "Showing masjids within {{distance}}km",
+    "prayer": "prayer",
+    "currentlyOpen": "currently open",
+    "clear": "Clear"
+  },
+  "savedMasjids": {
+    "title": "Your Saved Masjids",
+    "signInToSave": "Sign in to save your favorite masjids",
+    "createAccount": "Create an account or sign in to save masjids, track prayer times, and receive notifications.",
+    "loading": "Loading your saved masjids...",
+    "error": "There was an error loading your saved masjids. Please try again.",
+    "retry": "Retry",
+    "noSavedMasjids": "You haven't saved any masjids yet",
+    "browseMasjids": "Browse masjids and click the heart icon to add them to your saved list.",
+    "findMasjids": "Find Masjids"
+  },
+  "prayerTimes": {
+    "title": "Prayer Times",
+    "subtitle": "Check accurate prayer times for your location or any city worldwide",
+    "yourLocation": "Your Location",
+    "searchCity": "Search City",
+    "findTimes": "Find Times",
+    "loading": "Loading prayer times...",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "fajr": "Fajr",
+    "sunrise": "Sunrise",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha"
+  },
+  "donation": {
+    "title": "Support Our Masjid",
+    "subtitle": "Your generosity helps us maintain our facilities and serve the community"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Oops! Page not found",
+    "returnHome": "Return to Home"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "cancel": "Cancel",
+    "submit": "Submit"
+  }
+}

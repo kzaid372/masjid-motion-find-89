@@ -20,14 +20,17 @@ import {
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 import AuthButton from './AuthButton';
+import LanguageSwitcher from './LanguageSwitcher';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { user, signInWithGoogle } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -82,7 +85,7 @@ const Navbar = () => {
                       navigationMenuTriggerStyle(),
                       isActive('/') && "bg-masjid-green/10 text-masjid-green dark:text-masjid-green"
                     )}>
-                      Home
+                      {t('navbar.home')}
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
@@ -92,7 +95,7 @@ const Navbar = () => {
                       navigationMenuTriggerStyle(),
                       isActive('/find') && "bg-masjid-green/10 text-masjid-green dark:text-masjid-green"
                     )}>
-                      Find Masjid
+                      {t('navbar.findMasjid')}
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
@@ -102,7 +105,7 @@ const Navbar = () => {
                       navigationMenuTriggerStyle(),
                       isActive('/prayer-times') && "bg-masjid-green/10 text-masjid-green dark:text-masjid-green"
                     )}>
-                      Prayer Times
+                      {t('navbar.prayerTimes')}
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
@@ -112,7 +115,7 @@ const Navbar = () => {
                       navigationMenuTriggerStyle(),
                       isActive('/saved') && "bg-masjid-green/10 text-masjid-green dark:text-masjid-green"
                     )}>
-                      Favorites
+                      {t('navbar.favorites')}
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
@@ -122,6 +125,8 @@ const Navbar = () => {
 
           {/* Search and Menu Actions */}
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            
             <Button 
               variant="outline" 
               size="icon" 
@@ -182,11 +187,11 @@ const Navbar = () => {
                   )}
                   
                   <nav className="flex flex-col">
-                    <NavLink to="/" icon={MapPin}>Home</NavLink>
-                    <NavLink to="/find" icon={MapPin}>Find Masjid</NavLink>
-                    <NavLink to="/prayer-times" icon={Clock}>Prayer Times</NavLink>
-                    <NavLink to="/saved" icon={Heart}>Favorites</NavLink>
-                    <NavLink to="/settings" icon={Settings}>Settings</NavLink>
+                    <NavLink to="/" icon={MapPin}>{t('navbar.home')}</NavLink>
+                    <NavLink to="/find" icon={MapPin}>{t('navbar.findMasjid')}</NavLink>
+                    <NavLink to="/prayer-times" icon={Clock}>{t('navbar.prayerTimes')}</NavLink>
+                    <NavLink to="/saved" icon={Heart}>{t('navbar.favorites')}</NavLink>
+                    <NavLink to="/settings" icon={Settings}>{t('navbar.settings')}</NavLink>
                   </nav>
                 </div>
               </DrawerContent>
