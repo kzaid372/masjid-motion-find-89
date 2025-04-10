@@ -1,3 +1,4 @@
+
 import express from 'express';
 import { ObjectId } from 'mongodb';
 import { getDb } from '../config/db';
@@ -45,7 +46,7 @@ router.get('/nearby', async (req, res) => {
       };
     });
     
-    res.json(masjidsWithDistance);
+    return res.json(masjidsWithDistance);
   } catch (error) {
     console.error('Error getting nearby masjids:', error);
     res.status(500).json({ message: 'Server error' });
@@ -66,7 +67,7 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Masjid not found' });
     }
     
-    res.json(masjid);
+    return res.json(masjid);
   } catch (error) {
     console.error('Error getting masjid:', error);
     res.status(500).json({ message: 'Server error' });
@@ -90,7 +91,7 @@ router.get('/search', async (req, res) => {
       ],
     }).toArray();
     
-    res.json(masjids);
+    return res.json(masjids);
   } catch (error) {
     console.error('Error searching masjids:', error);
     res.status(500).json({ message: 'Server error' });
@@ -118,21 +119,21 @@ router.post('/save', verifyAuth, async (req, res) => {
     }
     
     // Check if masjid is already saved
-    const user = await db.collection('users').findOne({
+    const user = await db.collection<User>('users').findOne({
       _id: new ObjectId(userId),
       savedMasjids: new ObjectId(masjidId),
     });
     
     if (user) {
       // Masjid is already saved, remove it
-      await db.collection('users').updateOne(
+      await db.collection<User>('users').updateOne(
         { _id: new ObjectId(userId) },
         { $pull: { savedMasjids: new ObjectId(masjidId) } }
       );
       return res.json({ saved: false });
     } else {
       // Masjid is not saved, add it
-      await db.collection('users').updateOne(
+      await db.collection<User>('users').updateOne(
         { _id: new ObjectId(userId) },
         { $addToSet: { savedMasjids: new ObjectId(masjidId) } }
       );
@@ -151,7 +152,7 @@ router.get('/saved', verifyAuth, async (req, res) => {
     const db = getDb();
     
     // Get user's saved masjids
-    const user = await db.collection('users').findOne({
+    const user = await db.collection<User>('users').findOne({
       _id: new ObjectId(userId),
     });
     

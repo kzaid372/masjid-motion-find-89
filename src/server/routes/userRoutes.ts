@@ -49,7 +49,7 @@ router.get('/saved-masjids', verifyAuth, async (req, res) => {
     
     // Get masjid details for each saved masjid
     const savedMasjids = await db.collection<Masjid>('masjids').find({
-      _id: { $in: user.savedMasjids },
+      _id: { $in: user.savedMasjids as ObjectId[] },
     }).toArray();
     
     return res.json(savedMasjids);
