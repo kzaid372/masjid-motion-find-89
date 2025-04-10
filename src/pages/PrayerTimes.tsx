@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -55,7 +54,7 @@ const PrayerTimes = () => {
   // Query for prayer times
   const { data: prayerTimesData, isLoading: isLoadingPrayerTimes } = useQuery({
     queryKey: ['prayerTimes', coordinates?.lat, coordinates?.lng],
-    queryFn: () => coordinates ? PrayerTimesApi.getForLocation(coordinates.lat, coordinates.lng) : Promise.resolve(null),
+    queryFn: () => coordinates ? PrayerTimesApi.getByLocation(coordinates.lat, coordinates.lng) : Promise.resolve(null),
     enabled: !!coordinates,
     meta: {
       onError: () => {
@@ -141,7 +140,6 @@ const PrayerTimes = () => {
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* Key fix: Ensure location is never an empty string */}
                     <SelectItem value={location || "New York, NY"}>{location || "New York, NY"}</SelectItem>
                     <SelectItem value="New York, NY">New York, NY</SelectItem>
                     <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>

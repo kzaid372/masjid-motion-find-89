@@ -5,11 +5,14 @@ import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import RecommendedMasjids from '@/components/RecommendedMasjids';
 import Footer from '@/components/Footer';
+import MobileBottomNav from '@/components/MobileBottomNav';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -103,10 +106,13 @@ const Index = () => {
       
       <Footer />
       
-      {/* Scroll to top button */}
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
+      
+      {/* Scroll to top button - adjust for mobile to not overlap bottom nav */}
       <button 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-24 right-6 md:bottom-10 md:right-10 bg-masjid-green/90 text-white p-3 rounded-full shadow-lg hover:bg-masjid-green transition-all duration-300 z-50"
+        className={`fixed bottom-${isMobile ? '24' : '10'} right-6 md:right-10 bg-masjid-green/90 text-white p-3 rounded-full shadow-lg hover:bg-masjid-green transition-all duration-300 z-50`}
         aria-label="Scroll to top"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
