@@ -4,30 +4,53 @@ import { getDb } from '../config/db';
 
 const router = express.Router();
 
-// Get prayer times for a location
-router.get('/', async (req: Request, res: Response) => {
+// Get prayer times by location (lat, lng)
+router.get('/location', async (req: Request, res: Response) => {
   try {
-    const { lat, lng, date } = req.query;
+    const { lat, lng } = req.query;
     
     // Validate parameters
     if (!lat || !lng) {
       return res.status(400).json({ message: 'Latitude and longitude are required' });
     }
     
-    // For now, we'll use mock data, but in a real app you'd call a prayer times API
-    // or calculate them based on the coordinates
+    // In a real app, you'd call an API that calculates prayer times
+    // For this example, we'll return dummy data
     const prayerTimes = {
-      date: date || new Date().toISOString().split('T')[0],
-      fajr: '5:12 AM',
-      sunrise: '6:28 AM',
-      dhuhr: '1:05 PM',
-      asr: '4:35 PM',
-      maghrib: '7:42 PM',
-      isha: '9:12 PM',
-      location: {
-        latitude: parseFloat(lat as string),
-        longitude: parseFloat(lng as string),
-      }
+      fajr: '5:30 AM',
+      dhuhr: '1:15 PM',
+      asr: '4:45 PM',
+      maghrib: '7:30 PM',
+      isha: '9:00 PM',
+      date: new Date().toISOString(),
+    };
+    
+    res.json(prayerTimes);
+  } catch (error) {
+    console.error('Error getting prayer times:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get prayer times by city and country
+router.get('/city', async (req: Request, res: Response) => {
+  try {
+    const { city, country } = req.query;
+    
+    // Validate parameters
+    if (!city || !country) {
+      return res.status(400).json({ message: 'City and country are required' });
+    }
+    
+    // In a real app, you'd call an API that calculates prayer times
+    // For this example, we'll return dummy data
+    const prayerTimes = {
+      fajr: '5:30 AM',
+      dhuhr: '1:15 PM',
+      asr: '4:45 PM',
+      maghrib: '7:30 PM',
+      isha: '9:00 PM',
+      date: new Date().toISOString(),
     };
     
     res.json(prayerTimes);

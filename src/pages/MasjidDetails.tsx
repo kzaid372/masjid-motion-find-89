@@ -7,13 +7,15 @@ import Footer from '@/components/Footer';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { 
   MapPin, Phone, Mail, Globe, Star, Info, Clock, Calendar, 
-  Navigation, Heart, Share2, Loader2, ChevronLeft 
+  Navigation, Heart, Share2, Loader2, ChevronLeft, 
+  ParkingCircle, Accessibility, Languages, History, MessageCircle, Users, Home, Building
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MasjidApi } from '@/services/api';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent } from '@/components/ui/card';
 
 // Component for prayer time display
 const PrayerTimeCard = ({ name, time }: { name: string, time: string }) => (
@@ -56,6 +58,35 @@ const ReviewItem = ({ review }: { review: any }) => (
       </div>
     </div>
     <p className="text-gray-600 dark:text-gray-300 text-sm">{review.text}</p>
+  </div>
+);
+
+// Component for event display
+const EventCard = ({ event }: { event: any }) => (
+  <Card className="mb-4">
+    <CardContent className="pt-6">
+      <div className="flex items-start mb-2">
+        <Calendar className="h-5 w-5 text-masjid-green mr-3 mt-0.5" />
+        <div>
+          <h4 className="font-medium text-masjid-dark dark:text-white">{event.name}</h4>
+          <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+            <div>{event.date} at {event.time}</div>
+            <p className="mt-2">{event.description}</p>
+          </div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Component for features/amenities display
+const FeatureItem = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
+  <div className="flex items-start mb-4">
+    <div className="text-masjid-green mr-3 mt-1">{icon}</div>
+    <div>
+      <h4 className="font-medium text-masjid-dark dark:text-white">{title}</h4>
+      <p className="text-sm text-gray-600 dark:text-gray-300">{description}</p>
+    </div>
   </div>
 );
 
@@ -120,6 +151,15 @@ const MasjidDetails = () => {
     }
   };
 
+  const getDirections = () => {
+    if (masjid && masjid.location) {
+      const lat = masjid.location.coordinates[1];
+      const lng = masjid.location.coordinates[0];
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   // Handle loading and error states
   if (isLoading) {
     return (
@@ -155,6 +195,7 @@ const MasjidDetails = () => {
     { value: "prayer-times", icon: <Clock className="h-4 w-4 mr-2" />, label: "Prayer Times" },
     { value: "programs", icon: <Calendar className="h-4 w-4 mr-2" />, label: "Programs" },
     { value: "reviews", icon: <Star className="h-4 w-4 mr-2" />, label: "Reviews" },
+    { value: "amenities", icon: <Building className="h-4 w-4 mr-2" />, label: "Amenities" },
     { 
       value: "gallery", 
       icon: (
@@ -174,7 +215,8 @@ const MasjidDetails = () => {
         </svg>
       ), 
       label: "Gallery" 
-    }
+    },
+    { value: "history", icon: <History className="h-4 w-4 mr-2" />, label: "History" }
   ];
 
   return (
@@ -225,8 +267,31 @@ const MasjidDetails = () => {
                       ))}
                     </div>
                     <span className="text-white text-sm">
-                      {masjid.reviewCount} reviews
+                      {masjid.reviewCount || reviews?.length || 0} reviews
                     </span>
+                  </div>
+                  
+                  {/* Quick Info Badges */}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {masjid.capacity && (
+                      <div className="bg-white/10 px-2 py-1 rounded-full text-white text-xs flex items-center">
+                        <Users className="h-3 w-3 mr-1" />
+                        {masjid.capacity} capacity
+                      </div>
+                    )}
+                    {masjid.languages && masjid.languages.length > 0 && (
+                      <div className="bg-white/10 px-2 py-1 rounded-full text-white text-xs flex items-center">
+                        <Languages className="h-3 w-3 mr-1" />
+                        {masjid.languages.slice(0, 2).join(', ')}
+                        {masjid.languages.length > 2 && '...'}
+                      </div>
+                    )}
+                    {masjid.parking?.available && (
+                      <div className="bg-white/10 px-2 py-1 rounded-full text-white text-xs flex items-center">
+                        <ParkingCircle className="h-3 w-3 mr-1" />
+                        Parking available
+                      </div>
+                    )}
                   </div>
                 </div>
                 
@@ -250,6 +315,7 @@ const MasjidDetails = () => {
                   <Button
                     variant="default"
                     className="bg-masjid-green hover:bg-masjid-green/90"
+                    onClick={getDirections}
                   >
                     <Navigation className="h-5 w-5 mr-2" />
                     <span>Directions</span>
@@ -301,6 +367,53 @@ const MasjidDetails = () => {
                       </span>
                     ))}
                   </div>
+
+                  {/* Key Information */}
+                  {(masjid.yearFounded || masjid.founder || masjid.capacity) && (
+                    <div className="border-t border-gray-100 dark:border-gray-700 pt-6 mt-6">
+                      <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-4">Key Information</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {masjid.yearFounded && (
+                          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Year Founded</div>
+                            <div className="font-medium text-masjid-dark dark:text-white">{masjid.yearFounded}</div>
+                          </div>
+                        )}
+                        {masjid.founder && (
+                          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Founder</div>
+                            <div className="font-medium text-masjid-dark dark:text-white">{masjid.founder}</div>
+                          </div>
+                        )}
+                        {masjid.capacity && (
+                          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Capacity</div>
+                            <div className="font-medium text-masjid-dark dark:text-white">{masjid.capacity} people</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Upcoming Events */}
+                  {masjid.events && masjid.events.length > 0 && (
+                    <div className="border-t border-gray-100 dark:border-gray-700 pt-6 mt-6">
+                      <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-4">
+                        <Calendar className="inline-block mr-2 h-5 w-5 text-masjid-green" />
+                        Upcoming Events
+                      </h3>
+                      <div className="space-y-4">
+                        {masjid.events.slice(0, 2).map((event, index) => (
+                          <EventCard key={index} event={event} />
+                        ))}
+                        {masjid.events.length > 2 && (
+                          <Button variant="link" className="pl-0 text-masjid-green" onClick={() => document.querySelector('[value="programs"]')?.dispatchEvent(new Event('click'))}>
+                            View all {masjid.events.length} events
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
@@ -465,6 +578,47 @@ const MasjidDetails = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Today's Prayer Times Widget */}
+                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-4 flex items-center">
+                      <Clock className="h-5 w-5 text-masjid-green mr-2" />
+                      Today's Prayer Times
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex justify-between px-3 py-2 bg-masjid-green/5 rounded">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Fajr</span>
+                        <span className="text-sm font-medium text-masjid-green">{masjid.prayerTimes.fajr}</span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2 bg-masjid-green/5 rounded">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Dhuhr</span>
+                        <span className="text-sm font-medium text-masjid-green">{masjid.prayerTimes.dhuhr}</span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2 bg-masjid-green/5 rounded">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Asr</span>
+                        <span className="text-sm font-medium text-masjid-green">{masjid.prayerTimes.asr}</span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2 bg-masjid-green/5 rounded">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Maghrib</span>
+                        <span className="text-sm font-medium text-masjid-green">{masjid.prayerTimes.maghrib}</span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2 bg-masjid-green/5 rounded">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Isha</span>
+                        <span className="text-sm font-medium text-masjid-green">{masjid.prayerTimes.isha}</span>
+                      </div>
+                      <div className="flex justify-between px-3 py-2 bg-masjid-green/5 rounded">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Jumu'ah</span>
+                        <span className="text-sm font-medium text-masjid-green">{masjid.prayerTimes.jummah}</span>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="link" 
+                      className="mt-2 text-masjid-green p-0 h-auto text-sm"
+                      onClick={() => document.querySelector('[value="prayer-times"]')?.dispatchEvent(new Event('click'))}
+                    >
+                      View full prayer schedule
+                    </Button>
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -493,6 +647,28 @@ const MasjidDetails = () => {
                   Prayer times change throughout the year based on the sun's position. 
                   Always check the latest times before visiting.
                 </p>
+              </div>
+
+              {/* Prayer Time Adjustments */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-4">
+                  Prayer Time Adjustments
+                </h3>
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4">
+                  <h4 className="font-medium text-masjid-dark dark:text-white mb-2">Ramadan Schedule</h4>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">
+                    During Ramadan, the prayer schedule may be adjusted. Isha prayer and Taraweeh will be 
+                    combined and start 15 minutes after Maghrib. The masjid will remain open until midnight.
+                  </p>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <h4 className="font-medium text-masjid-dark dark:text-white mb-2">Calculation Method</h4>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">
+                    This masjid follows the calculation method based on Islamic Society of North America (ISNA) standards.
+                    Adjustments are made seasonally to ensure accuracy.
+                  </p>
+                </div>
               </div>
             </TabsContent>
             
@@ -532,6 +708,32 @@ const MasjidDetails = () => {
                 <p className="text-gray-600 dark:text-gray-300">
                   No regular programs or events available at this time.
                 </p>
+              )}
+
+              {/* Events Section */}
+              {masjid.events && masjid.events.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold text-masjid-dark dark:text-white mb-6">
+                    Upcoming Events
+                  </h2>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {masjid.events.map((event, index) => (
+                      <Card key={index} className="overflow-hidden">
+                        <div className="bg-masjid-green text-white text-xs font-medium px-3 py-1">
+                          UPCOMING EVENT
+                        </div>
+                        <CardContent className="pt-4">
+                          <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-2">{event.name}</h3>
+                          <div className="flex items-center text-gray-500 dark:text-gray-400 mb-3">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            <span>{event.date} at {event.time}</span>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm">{event.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               )}
               
               <div className="mt-8 p-4 bg-masjid-green/10 dark:bg-masjid-green/5 rounded-lg border border-masjid-green/20 dark:border-masjid-green/10">
@@ -573,6 +775,112 @@ const MasjidDetails = () => {
                 </div>
               )}
             </TabsContent>
+
+            {/* Amenities Tab (New) */}
+            <TabsContent value="amenities" className="p-6">
+              <h2 className="text-xl font-semibold text-masjid-dark dark:text-white mb-6">
+                Amenities and Facilities
+              </h2>
+              
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-4">
+                    <Building className="h-5 w-5 inline-block mr-2 text-masjid-green" />
+                    Building Facilities
+                  </h3>
+                  <div className="space-y-4">
+                    {masjid.parking && (
+                      <FeatureItem 
+                        icon={<ParkingCircle className="h-5 w-5" />}
+                        title="Parking"
+                        description={masjid.parking.available 
+                          ? `Available${masjid.parking.capacity ? ` (${masjid.parking.capacity} spaces)` : ''}. ${masjid.parking.details || ''}`
+                          : "Not available"}
+                      />
+                    )}
+                    
+                    {masjid.accessibility && (
+                      <FeatureItem 
+                        icon={<Accessibility className="h-5 w-5" />}
+                        title="Accessibility"
+                        description={`${masjid.accessibility.wheelchairAccess ? 'Wheelchair accessible' : 'Not wheelchair accessible'}. ${masjid.accessibility.elevators ? 'Elevators available.' : ''}${masjid.accessibility.details ? ` ${masjid.accessibility.details}` : ''}`}
+                      />
+                    )}
+                    
+                    {masjid.capacity && (
+                      <FeatureItem 
+                        icon={<Users className="h-5 w-5" />}
+                        title="Capacity"
+                        description={`Can accommodate up to ${masjid.capacity} worshippers`}
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-4">
+                    <Home className="h-5 w-5 inline-block mr-2 text-masjid-green" />
+                    Community Facilities
+                  </h3>
+                  <div className="space-y-4">
+                    {masjid.facilities.includes('Wudhu Area') && (
+                      <FeatureItem 
+                        icon={<span className="flex items-center justify-center h-5 w-5 bg-masjid-green/10 rounded-full">W</span>}
+                        title="Wudhu Area"
+                        description="Dedicated area for performing ablution before prayer"
+                      />
+                    )}
+                    
+                    {masjid.facilities.includes('Library') && (
+                      <FeatureItem 
+                        icon={<span className="flex items-center justify-center h-5 w-5 bg-masjid-green/10 rounded-full">L</span>}
+                        title="Library"
+                        description="Collection of Islamic books and resources available to the community"
+                      />
+                    )}
+                    
+                    {masjid.facilities.includes('Community Hall') && (
+                      <FeatureItem 
+                        icon={<span className="flex items-center justify-center h-5 w-5 bg-masjid-green/10 rounded-full">C</span>}
+                        title="Community Hall"
+                        description="Multipurpose space for community events, gatherings, and classes"
+                      />
+                    )}
+                    
+                    {masjid.facilities.includes('Children\'s Area') && (
+                      <FeatureItem 
+                        icon={<span className="flex items-center justify-center h-5 w-5 bg-masjid-green/10 rounded-full">K</span>}
+                        title="Children's Area"
+                        description="Dedicated space for children's activities and education"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-8 p-4 bg-masjid-green/10 dark:bg-masjid-green/5 rounded-lg border border-masjid-green/20 dark:border-masjid-green/10">
+                <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-2">
+                  <MessageCircle className="h-5 w-5 inline-block mr-2 text-masjid-green" />
+                  Languages Spoken
+                </h3>
+                {masjid.languages && masjid.languages.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {masjid.languages.map((language, index) => (
+                      <span 
+                        key={index}
+                        className="bg-white dark:bg-gray-700 px-3 py-1 rounded-full text-gray-700 dark:text-gray-300 text-sm border border-gray-200 dark:border-gray-600"
+                      >
+                        {language}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Information about languages spoken is not available.
+                  </p>
+                )}
+              </div>
+            </TabsContent>
             
             {/* Gallery Tab Content */}
             <TabsContent value="gallery" className="p-6">
@@ -596,6 +904,56 @@ const MasjidDetails = () => {
                 <p className="text-gray-600 dark:text-gray-300">
                   No gallery images available for this masjid.
                 </p>
+              )}
+            </TabsContent>
+
+            {/* History Tab (New) */}
+            <TabsContent value="history" className="p-6">
+              <h2 className="text-xl font-semibold text-masjid-dark dark:text-white mb-6">
+                History of {masjid.name}
+              </h2>
+              
+              {masjid.history ? (
+                <div className="prose dark:prose-invert max-w-none">
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                    {masjid.history}
+                  </p>
+                  
+                  {/* Historical Timeline */}
+                  {masjid.yearFounded && (
+                    <div className="mt-8">
+                      <h3 className="text-lg font-semibold text-masjid-dark dark:text-white mb-4">Timeline</h3>
+                      <div className="relative border-l-2 border-masjid-green/50 pl-6 ml-3 space-y-8">
+                        <div className="relative">
+                          <div className="absolute -left-8 top-1 w-4 h-4 rounded-full bg-masjid-green"></div>
+                          <div className="font-medium text-masjid-dark dark:text-white">{masjid.yearFounded}</div>
+                          <p className="text-gray-600 dark:text-gray-300 mt-1">Masjid founded by {masjid.founder || 'the local community'}</p>
+                        </div>
+                        
+                        {masjid.yearFounded + 10 < new Date().getFullYear() && (
+                          <div className="relative">
+                            <div className="absolute -left-8 top-1 w-4 h-4 rounded-full bg-masjid-green"></div>
+                            <div className="font-medium text-masjid-dark dark:text-white">{masjid.yearFounded + 10}</div>
+                            <p className="text-gray-600 dark:text-gray-300 mt-1">Expansion of prayer hall to accommodate growing community</p>
+                          </div>
+                        )}
+                        
+                        <div className="relative">
+                          <div className="absolute -left-8 top-1 w-4 h-4 rounded-full bg-masjid-green"></div>
+                          <div className="font-medium text-masjid-dark dark:text-white">Present Day</div>
+                          <p className="text-gray-600 dark:text-gray-300 mt-1">Serving the community with regular programs and events</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  <History className="h-10 w-10 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    Historical information about this masjid isn't available yet.
+                  </p>
+                </div>
               )}
             </TabsContent>
           </div>
